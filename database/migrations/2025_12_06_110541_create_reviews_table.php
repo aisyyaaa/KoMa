@@ -11,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('komentar_rating', function (Blueprint $table) {
+        Schema::create('reviews', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->string('visitor_name');
+            $table->string('visitor_phone');
+            $table->string('visitor_email');
+            $table->integer('rating'); // 1-5
+            $table->text('comment');
             $table->timestamps();
         });
     }
@@ -22,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('komentar_rating');
+        Schema::dropIfExists('reviews');
     }
 };

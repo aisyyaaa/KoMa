@@ -47,22 +47,22 @@
                 </div>
             </div>
 
-            {{-- CONTAINER UNTUK REGISTER/PROFIL --}}
-            {{-- HANYA AKAN MENAMPILKAN REGISTER ATAU IKON PROFIL, BUKAN KEDUA-NYA --}}
+            {{-- CONTAINER UNTUK LOGIN/PROFIL --}}
+            {{-- HANYA AKAN MENAMPILKAN LOGIN ATAU IKON PROFIL, BUKAN KEDUA-NYA --}}
             <div id="auth-container" class="flex items-center text-koma-text-dark">
                 
-                {{-- Placeholder Tombol Register (Default) --}}
-                <div id="register-button">
-                    <a href="{{ route('seller.register') }}" class="text-white bg-koma-accent hover:bg-koma-hover-light hover:text-koma-text-dark font-medium border border-koma-accent rounded-md px-3 py-2 transition duration-150">
-                        Register
+                {{-- Placeholder Tombol Login (Default) --}}
+                <div id="login-button">
+                    <a href="{{ route('seller.auth.login') }}" class="text-white bg-koma-accent hover:bg-koma-hover-light hover:text-koma-text-dark font-medium border border-koma-accent rounded-md px-3 py-2 transition duration-150">
+                        Login
                     </a>
                 </div>
 
                 {{-- Placeholder Ikon Profil (Hidden by default) --}}
                 <div id="profile-icon" class="hidden">
-                    <a href="/dashboard-penjual" class="hover:text-koma-primary flex items-center space-x-2 p-2 rounded-full bg-koma-bg-light">
+                    <a href="/seller/dashboard" class="hover:text-koma-primary flex items-center space-x-2 p-2 rounded-full bg-koma-bg-light">
                         <svg class="w-6 h-6 text-koma-primary" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08s5.97 1.09 6 3.08c-1.29 1.94-3.5 3.22-6 3.22z"></path></svg>
-                        <span class="font-medium text-sm hidden sm:inline text-koma-primary">Akun Saya</span>
+                        <span class="font-medium text-sm hidden sm:inline text-koma-primary">Dashboard</span>
                     </a>
                 </div>
                 
@@ -172,32 +172,32 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const registerButton = document.getElementById('register-button');
+            const loginButton = document.getElementById('login-button');
             const profileIcon = document.getElementById('profile-icon');
             
             // 1. Cek apakah ada flash session dari redirect Laravel (hanya sekali jalan)
-            const isFreshlyRegistered = '{{ session("is_registered_flag") }}' === '1'; // Laravel flash session menyimpan '1' atau 'true'
+            const isLoggedIn = '{{ auth()->check() ? "1" : "0" }}' === '1';
 
             // 2. Cek apakah status sudah pernah disimpan di sessionStorage (untuk refresh)
-            const isRegisteredInSession = sessionStorage.getItem('is_seller_registered') === 'true';
+            const isLoggedInSession = sessionStorage.getItem('is_seller_logged_in') === 'true';
 
             // 3. Tentukan status akhir untuk tab ini
-            let showProfile = isRegisteredInSession;
+            let showProfile = isLoggedInSession || isLoggedIn;
 
-            if (isFreshlyRegistered) {
-                // Jika baru saja redirect dari POST, simpan status di sessionStorage
-                sessionStorage.setItem('is_seller_registered', 'true');
+            if (isLoggedIn) {
+                // Jika baru saja login, simpan status di sessionStorage
+                sessionStorage.setItem('is_seller_logged_in', 'true');
                 showProfile = true;
             }
 
             // 4. Update Tampilan
             if (showProfile) {
                 // Menampilkan Ikon Profil
-                registerButton.classList.add('hidden');
+                loginButton.classList.add('hidden');
                 profileIcon.classList.remove('hidden');
             } else {
-                // Menampilkan Tombol Register
-                registerButton.classList.remove('hidden');
+                // Menampilkan Tombol Login
+                loginButton.classList.remove('hidden');
                 profileIcon.classList.add('hidden');
             }
         });

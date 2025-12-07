@@ -10,26 +10,29 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('sellers', function (Blueprint $table) {
-            $table->id();
-            $table->string('storeName'); // Nama toko
-            $table->string('storeDescription')->nullable(); // Deskripsi singkat
-            $table->string('picName'); // Nama PIC
-            $table->string('picPhone')->unique(); // No Handphone PIC
-            $table->string('picEmail')->unique(); // email PIC
-            $table->string('picStreet'); // Alamat (nama jalan) PIC
-            $table->string('picRT'); // RT
-            $table->string('picRW'); // RW
-            $table->string('picVillage'); // Nama kelurahan
-            $table->string('picDistrict'); // KECAMATAN (Tambahan)
-            $table->string('picCity'); // Kabupaten/Kota
-            $table->string('picProvince'); // Propinsi
-            $table->string('picKtpNumber')->unique(); // No. KTP PIC
-            $table->string('picPhotoPath')->nullable(); // Foto PIC (path)
-            $table->string('picKtpFilePath')->nullable(); // File upload KTP PIC (path)
-            $table->enum('status', ['PENDING', 'ACTIVE', 'REJECTED'])->default('PENDING'); // Status
-            $table->timestamps();
-        });
+        // migration
+Schema::create('sellers', function (Blueprint $table) {
+    $table->id();
+    $table->string('store_name');
+    $table->text('store_description')->nullable();
+    $table->string('pic_name');
+    $table->string('pic_phone')->unique();
+    $table->string('pic_email')->unique();
+    $table->string('pic_street');
+    $table->string('pic_rt');
+    $table->string('pic_rw');
+    $table->string('pic_village');
+    $table->string('pic_city');
+    $table->string('pic_province');
+    $table->string('pic_ktp_number')->unique();
+    $table->string('pic_photo_path');
+    $table->string('pic_ktp_file_path');
+    $table->enum('status', ['PENDING', 'ACTIVE', 'REJECTED'])->default('PENDING');
+    $table->timestamp('email_verified_at')->nullable();
+    $table->string('password');
+    $table->rememberToken();
+    $table->timestamps();
+});
     }
 
     public function down(): void
