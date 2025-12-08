@@ -69,10 +69,19 @@ Route::get('seller/reports/stock-by-rating', [SellerReportController::class, 'st
 Route::get('seller/reports/low-stock', [SellerReportController::class, 'lowStock'])->name('seller.reports.low_stock');
 Route::get('seller/reports/export/{type}', [SellerReportController::class, 'exportPdf'])->name('seller.reports.export.pdf');
 
+// Public index route for reports (development): redirect to the first report
+Route::get('seller/reports', function () {
+    return redirect()->route('seller.reports.stock_by_quantity');
+})->name('seller.reports.index');
+
 // TEMPORARY: Seller Products routes (akses tanpa login untuk development)
 Route::prefix('seller/products')->name('seller.products.')->group(function () {
     Route::get('', [SellerProductController::class, 'index'])->name('index');
-// ... existing code ...
+    Route::get('create', [SellerProductController::class, 'create'])->name('create');
+    Route::post('', [SellerProductController::class, 'store'])->name('store');
+    Route::get('{product}', [SellerProductController::class, 'show'])->name('show');
+    Route::get('{product}/edit', [SellerProductController::class, 'edit'])->name('edit');
+    Route::put('{product}', [SellerProductController::class, 'update'])->name('update');
     Route::delete('{product}', [SellerProductController::class, 'destroy'])->name('destroy');
 });
 
@@ -102,25 +111,17 @@ Route::prefix('seller/products')->name('seller.products.')->group(function () {
     Route::delete('{product}', [SellerProductController::class, 'destroy'])->name('destroy');
 });
 
-// Reports (Temporary public for dev)
-Route::prefix('seller/reports')->name('seller.reports.')->group(function () {
-    Route::get('stock-by-quantity', [SellerReportController::class, 'stockByQuantity'])->name('stock_by_quantity');
-    Route::get('stock-by-rating', [SellerReportController::class, 'stockByRating'])->name('stock_by_rating');
-    Route::get('low-stock', [SellerReportController::class, 'lowStock'])->name('low_stock');
-    Route::get('export/{type}', [SellerReportController::class, 'exportPdf'])->name('export.pdf');
-});
-
-// Reports (Temporary public for dev)
-Route::prefix('seller/reports')->name('seller.reports.')->group(function () {
-    Route::get('stock-by-quantity', [SellerReportController::class, 'stockByQuantity'])->name('stock_by_quantity');
-    Route::get('stock-by-rating', [SellerReportController::class, 'stockByRating'])->name('stock_by_rating');
-    Route::get('low-stock', [SellerReportController::class, 'lowStock'])->name('low_stock');
-    Route::get('export/{type}', [SellerReportController::class, 'exportPdf'])->name('export.pdf');
-});
-
 // Protected seller routes
 Route::middleware(['auth'])->prefix('seller')->name('seller.')->group(function () {
     // Dashboard sudah di-define di atas, jadi hanya route lain yang protected
+
+    // Reports (duplicate - routes exposed publicly during development above)
+    // The public report routes are declared earlier to allow access without authentication.
+    // Keep these commented while in dev to avoid route duplication and auth blocking.
+    // Route::get('reports/stock-by-quantity', [SellerReportController::class, 'stockByQuantity'])->name('reports.stock_by_quantity');
+    // Route::get('reports/stock-by-rating', [SellerReportController::class, 'stockByRating'])->name('reports.stock_by_rating');
+    // Route::get('reports/low-stock', [SellerReportController::class, 'lowStock'])->name('reports.low_stock');
+    // Route::get('reports/export/{type}', [SellerReportController::class, 'exportPdf'])->name('reports.export');
 
     // Reviews
     Route::get('reviews', [SellerReviewController::class, 'index'])->name('reviews.index');

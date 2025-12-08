@@ -30,10 +30,12 @@ class ProductRequest extends FormRequest
             'length' => ['nullable', 'numeric', 'min:0'],
             'width' => ['nullable', 'numeric', 'min:0'],
             'primary_images' => ['nullable', 'file', 'image', 'mimes:jpg,png', 'max:5120'],
+            'additional_images' => ['nullable', 'array'],
+            'additional_images.*' => ['nullable', 'file', 'image', 'mimes:jpg,png', 'max:5120'],
         ];
 
         if ($this->isMethod('post')) {
-            foreach (['seller_id','category_id','name','description','price','stock','sku','condition'] as $k) {
+            foreach (['category_id','name','description','price','stock','sku','condition'] as $k) {
                 $base[$k] = array_merge(['required'], (array)$base[$k]);
             }
             // unique SKU on create

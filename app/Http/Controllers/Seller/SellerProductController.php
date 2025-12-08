@@ -53,6 +53,17 @@ class SellerProductController extends Controller
             $validated['primary_images'] = $path;
         }
 
+        // Handle additional images (array of files)
+        if ($request->hasFile('additional_images')) {
+            $paths = [];
+            foreach ($request->file('additional_images') as $file) {
+                if ($file && $file->isValid()) {
+                    $paths[] = $file->store('products', 'public');
+                }
+            }
+            $validated['additional_images'] = $paths;
+        }
+
         // Set seller_id (untuk dev: hardcode 1, nanti ganti auth()->id())
         $validated['seller_id'] = auth()->id() ?? 1;
 
@@ -81,6 +92,20 @@ class SellerProductController extends Controller
         if ($request->hasFile('primary_images')) {
             $path = $request->file('primary_images')->store('products', 'public');
             $validated['primary_images'] = $path;
+        }
+
+        // Handle additional images on update: append to existing list
+        if ($request->hasFile('additional_images')) {
+            $existing = $product->additional_images ?? [];
+            if (!is_array($existing)) {
+                $existing = json_decode($existing, true) ?: [];
+            }
+            foreach ($request->file('additional_images') as $file) {
+                if ($file && $file->isValid()) {
+                    $existing[] = $file->store('products', 'public');
+                }
+            }
+            $validated['additional_images'] = $existing;
         }
 
         // Update produk

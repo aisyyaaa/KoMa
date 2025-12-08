@@ -48,7 +48,45 @@ class SellerReportController extends Controller
 
     public function exportPdf($type)
     {
-        // export report PDF placeholder
-        return response()->download(storage_path('app/public/dummy.pdf'));
+        // Ensure DOMPDF package is installed
+        if (!class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
+            // Provide a user-friendly redirect with flash message instead of aborting
+            return redirect()->back()->with('error', 'PDF export requires package "barryvdh/laravel-dompdf". Please run: composer require barryvdh/laravel-dompdf');
+        }
+
+        $sellerId = Auth::id() ?? 1;
+
+        switch ($type) {
+            case 'stock_by_quantity':
+                $products = Product::where('seller_id', $sellerId)
+                            ->with(['category', 'reviews'])
+                            ->orderBy('stock', 'desc')
+                            ->get();
+                $view = 'seller.reports.pdf.stock_by_quantity';
+                $filename = 'laporan_stok_kuantitas.pdf';
+                break;
+            case 'stock_by_rating':
+                $products = Product::where('seller_id', $sellerId)
+                            ->with(['category', 'reviews'])
+                            ->get()
+                            ->sortByDesc(function($p) { return $p->averageRating(); });
+                $view = 'seller.reports.pdf.stock_by_rating';
+                $filename = 'laporan_stok_rating.pdf';
+                break;
+            case 'low_stock':
+                $products = Product::where('seller_id', $sellerId)
+                            ->where('stock', '<', 2)
+                            ->with(['category', 'reviews'])
+                            ->orderBy('stock', 'asc')
+                            ->get();
+                $view = 'seller.reports.pdf.low_stock';
+                $filename = 'laporan_stok_rendah.pdf';
+                break;
+            default:
+                abort(404);
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView($view, compact('products'));
+        return $pdf->download($filename);
     }
 }

@@ -40,12 +40,28 @@
                     @endif
                 </div>
                 <div class="grid grid-cols-5 gap-3">
-                    {{-- Assuming you have an array of images. Let's create placeholders. --}}
-                    @for($i = 0; $i < 5; $i++)
+                    @php
+                        $additional = $product->additional_image_urls ?? [];
+                        $images = [];
+                        if ($product->primary_image_url) {
+                            $images[] = $product->primary_image_url;
+                        }
+                        $images = array_merge($images, $additional);
+                        // ensure 5 slots
+                        $images = array_pad($images, 5, null);
+                    @endphp
+
+                    @foreach($images as $i => $img)
                     <div class="bg-gray-200 rounded-lg cursor-pointer border-2 {{ $i == 0 ? 'border-koma-primary' : 'border-transparent' }} hover:border-koma-primary transition duration-150">
-                        <div class="aspect-square rounded bg-cover bg-center" style="background-image: url('{{ $product->primary_image_url }}')"></div>
+                        @if($img)
+                        <div class="aspect-square rounded bg-cover bg-center" style="background-image: url('{{ $img }}')"></div>
+                        @else
+                        <div class="aspect-square rounded bg-center flex items-center justify-center text-gray-400">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                        </div>
+                        @endif
                     </div>
-                    @endfor
+                    @endforeach
                 </div>
             </div>
 
@@ -82,7 +98,7 @@
                                     <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">SKU</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->sku }}</dd></div>
                                     <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">Brand</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->brand ?? '-' }}</dd></div>
                                     <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">Kategori</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->category->name ?? '-' }}</dd></div>
-                                    <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">Kondisi</dt><dd class="mt-1 text-sm text-gray-900 capitalize">{{ $product->condition }}</dd></div>
+                                    <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">Kondisi</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->condition_label }}</dd></div>
                                     <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">Berat</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->weight ? $product->weight.' gram' : '-' }}</dd></div>
                                     <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">Garansi</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->warranty ? $product->warranty.' bulan' : 'Tidak ada' }}</dd></div>
                                 </dl>

@@ -6,8 +6,11 @@
     <title>@yield('title', 'Seller Panel') - KoMa Market</title>
     @vite('resources/css/app.css')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-gray-50">
+
+    <x-notification />
 
     <div class="flex h-screen">
         
@@ -66,11 +69,10 @@
                 </a>
 
                 {{-- Laporan --}}
-                <div x-data="{ open: request()->routeIs('seller.reports.*') }">
+                <div x-data="{ open: {{ request()->routeIs('seller.reports.*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" 
-                            class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium 
-                                   {{ request()->routeIs('seller.reports.*') ? 'bg-gray-100 text-koma-primary' : 'text-gray-700 hover:bg-gray-100' }}
-                                   transition duration-150">
+                            class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700
+                                   hover:bg-gray-100 transition duration-150">
                         <span class="flex items-center">
                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -191,7 +193,20 @@
         </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     @stack('scripts')
+    @if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.dispatchEvent(new CustomEvent('show-notification', { detail: { type: 'success', message: {!! json_encode(session('success')) !!} } }));
+        });
+    </script>
+    @endif
+    @if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.dispatchEvent(new CustomEvent('show-notification', { detail: { type: 'error', message: {!! json_encode(session('error')) !!} } }));
+        });
+    </script>
+    @endif
 </body>
 </html>

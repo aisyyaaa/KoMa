@@ -3,7 +3,7 @@
 @section('title', 'Produk')
 
 @section('content')
-<div class="max-w-7xl mx-auto">
+<div class="max-w-7xl mx-auto" x-data="{ deleteModal: false, deleteFormUrl: '' }">
     
     {{-- PAGE HEADER --}}
     <div class="flex items-center justify-between mb-6">
@@ -120,10 +120,12 @@
                             <a href="{{ route('seller.products.edit', $product->id) }}" class="text-gray-500 hover:text-koma-accent p-1 rounded-full transition duration-150">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg>
                             </a>
-                            <form action="{{ route('seller.products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?');">
+                            <form :action="deleteFormUrl" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-gray-500 hover:text-red-500 p-1 rounded-full transition duration-150">
+                                <button 
+                                    @click.prevent="deleteModal = true; deleteFormUrl = '{{ route('seller.products.destroy', $product->id) }}'"
+                                    type="button" class="text-gray-500 hover:text-red-500 p-1 rounded-full transition duration-150">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                             </form>
@@ -157,5 +159,58 @@
             {{ $products->links() }}
         </div>
     @endif
+
+    {{-- DELETE CONFIRMATION MODAL --}}
+    <div x-show="deleteModal" x-cloak style="display: none;"
+         class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div @click.away="deleteModal = false"
+             class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-auto"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform scale-95"
+             x-transition:enter-end="opacity-100 transform scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 transform scale-100"
+             x-transition:leave-end="opacity-0 transform scale-95">
+            
+            <div class="flex items-start">
+                <div class="flex-shrink-0 mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <svg class="h-6 w-6 text-red-600" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div class="ml-4 text-left">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                        Hapus Produk
+                    </h3>
+                    <div class="mt-2">
+                        <p class="text-sm text-gray-500">
+                            Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan. Semua data produk akan dihapus secara permanen.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                <form :action="deleteFormUrl" method="POST" class="w-full sm:w-auto">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition">
+                        Hapus
+                    </button>
+                </form>
+                <button @click="deleteModal = false" type="button"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-koma-primary sm:mt-0 sm:w-auto sm:text-sm transition">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
