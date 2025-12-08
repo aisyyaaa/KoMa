@@ -5,44 +5,95 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Category;
+use App\Http\Requests\ProductRequest;
 
 class SellerProductController extends Controller
 {
     public function index()
     {
-        return view('seller.products.index');
+        // Development: allow listing without auth
+        $sellerId = auth()->id() ?? 1; // fallback to demo seller id
+        
+        // Get all categories for filter dropdown
+        $categories = Category::all();
+        
+        // Build query with search and filter
+        $query = Product::where('seller_id', $sellerId);
+        
+        // Search by product name
+        if (request('search')) {
+            $query->where('name', 'like', '%' . request('search') . '%');
+        }
+        
+        // Filter by category
+        if (request('category')) {
+            $query->where('category_id', request('category'));
+        }
+        
+        // Paginate results
+        $products = $query->paginate(10);
+        
+        return view('seller.products.index', ['products' => $products, 'categories' => $categories]);
     }
 
     public function create()
     {
-        return view('seller.products.create');
+        $categories = Category::all();
+        return view('seller.products.create', ['categories' => $categories]);
     }
 
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-        // validate and store product (use StoreProductRequest)
-        return redirect()->route('seller.products.index');
+        $validated = $request->validated();
+
+        // Handle upload gambar - note: form uses 'primary_images' but model expects 'primary_images'
+        if ($request->hasFile('primary_images')) {
+            $path = $request->file('primary_images')->store('products', 'public');
+            $validated['primary_images'] = $path;
+        }
+
+        // Set seller_id (untuk dev: hardcode 1, nanti ganti auth()->id())
+        $validated['seller_id'] = auth()->id() ?? 1;
+
+        // Buat produk baru
+        Product::create($validated);
+
+        return redirect()->route('seller.products.index')->with('success', 'Produk berhasil ditambahkan');
     }
 
     public function show(Product $product)
     {
-        return view('seller.products.show', compact('product'));
+        return view('seller.products.show', ['product'=> $product]);
     }
 
     public function edit(Product $product)
     {
-        return view('seller.products.edit', compact('product'));
+        $categories = Category::all();
+        
+        return view('seller.products.edit', ['product'=> $product, 'categories' => $categories]);
     }
-
-    public function update(Request $request, Product $product)
+    public function update(ProductRequest $request, Product $product)
     {
-        // validate and update
-        return redirect()->route('seller.products.index');
+        $validated = $request->validated();
+
+        // Handle upload gambar baru - note: form uses 'primary_images'
+        if ($request->hasFile('primary_images')) {
+            $path = $request->file('primary_images')->store('products', 'public');
+            $validated['primary_images'] = $path;
+        }
+
+        // Update produk
+        $product->update($validated);
+
+        return redirect()->route('seller.products.show', $product->id)
+                        ->with('success', 'Produk berhasil diupdate');
     }
 
     public function destroy(Product $product)
     {
         $product->delete();
-        return redirect()->route('seller.products.index');
+
+        return redirect()->route('seller.products.index')->with('success', 'Produk berhasil dihapus');
     }
 }

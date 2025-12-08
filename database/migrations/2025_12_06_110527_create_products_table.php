@@ -18,9 +18,17 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->decimal('price', 12, 2);
-            $table->integer('stock')->default(0);
-            $table->json('images')->nullable(); // array gambar
-            $table->boolean('is_active')->default(true);
+            $table->decimal('discount_price', 12, 2)->nullable();
+            $table->integer('stock')->default(value: 0);
+            $table->integer('min_stock')->default(value: 0);
+            $table->string('sku')->unique();
+            $table->string('brand')->nullable();
+            $table->enum('condition', ['new', 'used'])->default('new');
+            $table->decimal('weight', 8, 2)->nullable();
+            $table->decimal('length', 8, 2)->nullable();
+            $table->decimal('width', 8, 2)->nullable();
+            $table->integer('warranty')->nullable(); 
+            $table->string('primary_images')->nullable(); 
             $table->timestamps();
         });
     }

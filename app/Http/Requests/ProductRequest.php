@@ -17,26 +17,34 @@ class ProductRequest extends FormRequest
             'seller_id' => ['integer', 'exists:sellers,id'],
             'category_id' => ['integer', 'exists:categories,id'],
             'name' => ['string', 'max:255'],
-            'description' => ['string'],
+            'description' => ['string', 'min:20'],
             'price' => ['numeric', 'min:0'],
+            'discount_price' => ['nullable', 'numeric', 'min:0'],
             'stock' => ['integer', 'min:0'],
-            'images' => ['nullable', 'array'],
-            'images.*' => ['file', 'image', 'max:5120'],
-            'is_active' => ['boolean'],
+            'min_stock' => ['nullable', 'integer', 'min:0'],
+            'sku' => ['string', 'max:100'],
+            'brand' => ['nullable', 'string', 'max:255'],
+            'condition' => ['in:new,used'],
+            'warranty' => ['nullable', 'integer', 'min:0'],
+            'weight' => ['nullable', 'numeric', 'min:0'],
+            'length' => ['nullable', 'numeric', 'min:0'],
+            'width' => ['nullable', 'numeric', 'min:0'],
+            'primary_images' => ['nullable', 'file', 'image', 'mimes:jpg,png', 'max:5120'],
         ];
 
         if ($this->isMethod('post')) {
-            $base['seller_id'] = ['required', ...$base['seller_id']];
-            $base['category_id'] = ['required', ...$base['category_id']];
-            $base['name'] = ['required', ...$base['name']];
-            $base['description'] = ['required', ...$base['description']];
-            $base['price'] = ['required', ...$base['price']];
-            $base['stock'] = ['required', ...$base['stock']];
+            foreach (['seller_id','category_id','name','description','price','stock','sku','condition'] as $k) {
+                $base[$k] = array_merge(['required'], (array)$base[$k]);
+            }
+            // unique SKU on create
+            $base['sku'][] = 'unique:products,sku';
         } else {
-            // For update allow partial
+            // For update allow partial and ensure SKU unique ignoring current id
             foreach (['seller_id','category_id','name','description','price','stock'] as $k) {
                 $base[$k] = array_merge(['sometimes','required'], (array)$base[$k]);
             }
+            $productId = $this->route('product');
+            $base['sku'][] = 'unique:products,sku,' . $productId;
         }
 
         return $base;
