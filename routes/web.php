@@ -95,6 +95,12 @@ Route::prefix('platform')->name('platform.')->group(function () {
     Route::get('reports/sellers-by-province', [PlatformReportController::class, 'sellersByProvince'])->name('reports.sellers_by_province');
     Route::get('reports/products-by-rating', [PlatformReportController::class, 'productsByRating'])->name('reports.products_by_rating');
     Route::get('reports/export/{type}', [PlatformReportController::class, 'exportPdf'])->name('reports.export');
+
+    // Seller verification (platform admin)
+    Route::get('verifications/sellers', [\App\Http\Controllers\Platform\SellerVerificationController::class, 'index'])->name('verifications.sellers.index');
+    Route::get('verifications/sellers/{seller}', [\App\Http\Controllers\Platform\SellerVerificationController::class, 'show'])->name('verifications.sellers.show');
+    Route::post('verifications/sellers/{seller}/approve', [\App\Http\Controllers\Platform\SellerVerificationController::class, 'approve'])->name('verifications.sellers.approve');
+    Route::post('verifications/sellers/{seller}/reject', [\App\Http\Controllers\Platform\SellerVerificationController::class, 'reject'])->name('verifications.sellers.reject');
 });
 
 // TEMPORARY: placeholder for reports index (used by dashboard links)

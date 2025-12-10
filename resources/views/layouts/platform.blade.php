@@ -38,7 +38,7 @@
                 </a>
 
                 {{-- Laporan (dropdown) --}}
-                <div x-data="{ open: {{ request()->routeIs('platform.reports.*') ? 'true' : 'false' }} }" class="">
+                <div x-data="{ open: {{ (request()->routeIs('platform.reports.*') || request()->routeIs('platform.verifications.*')) ? 'true' : 'false' }} }" class="">
                     <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium 
                           {{ request()->routeIs('platform.reports.*') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-100' }} 
                           transition duration-150">
@@ -69,19 +69,15 @@
                                 {{ request()->routeIs('platform.reports.products_by_rating') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
                             Laporan Daftar Produk
                         </a>
+                        <a href="{{ route('platform.verifications.sellers.index') }}"
+                           class="group flex items-center px-4 py-2 rounded-md text-sm font-medium w-full 
+                                {{ request()->routeIs('platform.verifications.*') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
+                            Verifikasi Penjual
+                        </a>
                     </div>
                 </div>
 
-                {{-- Pengaturan --}}
-                <a href="#" 
-                   class="flex items-center px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700
-                          hover:bg-gray-100 transition duration-150">
-                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    Pengaturan
-                </a>
+                {{-- Pengaturan module removed --}}
 
             </nav>
 
