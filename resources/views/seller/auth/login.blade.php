@@ -41,7 +41,7 @@
 
                 <div class="hidden lg:block mb-6">
                     <h2 class="text-xl font-bold text-koma-text-dark">Masuk ke Akun</h2>
-                    <p class="text-gray-600 text-xs mt-1">Kelola toko Anda sekarang</p>
+                    <p class="text-gray-600 text-xs mt-1">Kelola akun Anda sekarang</p>
                 </div>
 
                 @if ($errors->any())
@@ -51,7 +51,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('seller.auth.login.post') }}" method="POST">
+                <form action="{{ route('login.post') }}" method="POST">
                     @csrf
 
                     <div class="mb-4">
@@ -136,19 +136,24 @@
 
                 <div class="text-center mb-4">
                     <p class="text-gray-600 text-xs mb-2">
-                        Belum punya akun?
+                        Belum punya akun? Pilih pendaftaran:
                     </p>
-                    <a href="{{ route('seller.auth.register') }}" 
-                       class="w-full inline-block py-2.5 px-4 border-2 border-koma-primary text-koma-primary text-sm
-                              font-semibold rounded-lg hover:bg-koma-bg-light transition duration-200">
-                        Daftar Sekarang
-                    </a>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <a href="{{ route('buyer.register') }}" 
+                           class="inline-block w-full text-center py-2.5 px-4 bg-koma-accent text-white text-sm font-semibold rounded-lg hover:opacity-95 transition duration-200">
+                            Daftar sebagai Pengguna
+                        </a>
+                        <a href="{{ route('seller.auth.register') }}" 
+                           class="inline-block w-full text-center py-2.5 px-4 border-2 border-koma-primary text-koma-primary text-sm font-semibold rounded-lg hover:bg-koma-bg-light transition duration-200">
+                            Daftar sebagai Penjual
+                        </a>
+                    </div>
                 </div>
 
                 <div class="pt-4 border-t border-gray-200">
                     <p class="text-center text-xs text-gray-500">
-                        <a href="{{ route('katalog.index') }}" class="text-koma-primary hover:text-koma-danger font-semibold transition duration-150">
-                            Kembali ke Katalog
+                        <a href="{{ route('landingpage.index') }}" class="text-koma-primary hover:text-koma-danger font-semibold transition duration-150">
+                            Kembali ke Halaman Beranda
                         </a>
                     </p>
                 </div>

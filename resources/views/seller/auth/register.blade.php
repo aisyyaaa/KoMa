@@ -25,7 +25,7 @@
                 </p>
 
                 <p class="text-xs opacity-90">
-                    Sudah punya akun? <a href="{{ route('seller.auth.login') }}" class="font-semibold hover:underline">Masuk di sini</a>
+                    Sudah punya akun? <a href="{{ route('login') }}" class="font-semibold hover:underline">Masuk di sini</a>
                 </p>
             </div>
         </div>
@@ -368,7 +368,7 @@
                                    hover:bg-gray-50 transition duration-200 text-sm hidden">
                             ← Kembali
                         </button>
-                        <a href="{{ route('katalog.index') }}" 
+                        <a href="{{ route('landingpage.index') }}" 
                             class="flex-1 py-2.5 px-4 border-2 border-gray-300 text-gray-600 font-semibold rounded-lg 
                                    hover:bg-gray-50 transition duration-200 text-center text-sm"
                             id="cancelBtn">

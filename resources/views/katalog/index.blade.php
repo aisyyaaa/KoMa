@@ -52,7 +52,7 @@
                 
                 {{-- Placeholder Tombol Login (Default) --}}
                 <div id="login-button">
-                    <a href="{{ route('seller.auth.login') }}" class="text-white bg-koma-accent hover:bg-koma-hover-light hover:text-koma-text-dark font-medium border border-koma-accent rounded-md px-3 py-2 transition duration-150">
+                    <a href="{{ route('login') }}" class="text-white bg-koma-accent hover:bg-koma-hover-light hover:text-koma-text-dark font-medium border border-koma-accent rounded-md px-3 py-2 transition duration-150">
                         Login
                     </a>
                 </div>

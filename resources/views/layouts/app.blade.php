@@ -37,7 +37,7 @@
                         {{-- Kanan: Login / Register (Otentikasi) --}}
                         <div class="flex items-center space-x-4">
                             <a href="{{ url('/login') }}" class="text-gray-600 hover:text-indigo-700 font-medium">Login</a>
-                            <a href="{{ route('seller.register.form') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition duration-150">Daftar Penjual</a>
+                            <a href="{{ route('seller.register') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition duration-150">Daftar Penjual</a>
                         </div>
                     </div>
                 </div>
