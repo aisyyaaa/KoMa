@@ -1,22 +1,44 @@
-<?php 
-// app/Http/Controllers/CatalogController.php
+<?php
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use Illuminate\Http\Request;
-use App\Models\Product; // Akan digunakan nanti
 
 class CatalogController extends Controller
 {
     /**
-     * Tampilkan halaman utama (katalog produk).
+     * Menampilkan daftar semua produk untuk pengunjung (SRS-MartPlace-04).
      */
     public function index()
     {
-        // Di tahap ini, kita hanya menampilkan layoutnya saja.
-        // Data produk akan diambil di tahap SRS selanjutnya.
-        // $products = Product::all();
+        // 1. Ambil data produk
+        // Menggunakan eager loading (with) untuk Seller dan Category agar efisien (N+1 problem)
+        $products = Product::with(['seller', 'category'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(12); // Menggunakan paginasi untuk efisiensi halaman
         
-        return view('katalog.index');
+        // 2. Kirim data ke view
+        return view('katalog.index', compact('products'));
+    }
+
+    /**
+     * Menampilkan detail satu produk tertentu.
+     */
+    public function show(Product $product)
+    {
+        // Load data tambahan yang diperlukan di halaman detail:
+        // seller (untuk nama toko/lokasi), category, dan reviews (untuk menampilkan komentar).
+        $product->load([
+            'seller', 
+            'category', 
+            'reviews' => function ($query) {
+                $query->latest(); // Urutkan komentar dari yang terbaru
+            }
+        ]);
+        
+        // Model Product sudah memiliki accessor averageRating() yang bisa digunakan di view.
+        
+        return view('katalog.detail', compact('product'));
     }
 }

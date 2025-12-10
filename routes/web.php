@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\Review\ReviewController; // <-- INI DIREVISI: Import dari folder Review
 use App\Http\Controllers\Seller\Auth\SellerAuthController;
 use App\Http\Controllers\Seller\Auth\SellerVerificationController as SellerVerify;
 use App\Http\Controllers\Seller\SellerDashboardController;
@@ -19,14 +20,19 @@ use Illuminate\Support\Facades\Route;
 | Rute yang dapat diakses oleh Pengunjung Umum
 */
 
-// 1. Halaman Utama / Katalog Produk (Sesuai instruksi dosen)
-// Tampilan depan web langsung katalog.
+// 1. Halaman Utama / Katalog Produk (SRS-MartPlace-04)
 Route::get('/', [CatalogController::class, 'index'])->name('katalog.index');
-// 2. Registrasi Penjual (SRS-MartPlace-01)
-// Menampilkan formulir registrasi penjual (GET)
+
+// 2. Detail Produk (SRS-MartPlace-04)
+Route::get('/katalog/{product}', [CatalogController::class, 'show'])->name('katalog.show'); 
+
+// 3. Pemberian Komentar dan Rating (SRS-MartPlace-06)
+Route::post('/katalog/{product}/review', [ReviewController::class, 'store'])->name('review.store'); // <-- MENGGUNAKAN CONTROLLER DARI NAMESPACE YANG BENAR
+
+// 4. Registrasi Penjual (SRS-MartPlace-01)
 Route::get('/register/seller', [SellerAuthController::class, 'showRegister'])->name('seller.register');
-// Memproses data formulir registrasi (POST)
 Route::post('/register/seller', [SellerAuthController::class, 'register'])->name('seller.store');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -58,12 +64,7 @@ Route::get('seller/orders', function () {
     return view('seller.placeholder', ['title' => 'Pesanan']);
 })->name('seller.orders.index');
 
-// TEMPORARY: placeholder for reports index (used by dashboard links)
-// Route::get('seller/reports', function () {
-//     return view('seller.placeholder', ['title' => 'Laporan']);
-// })->name('seller.reports.index');
-
-// Reports
+// Reports (Akses publik sementara untuk development)
 Route::get('seller/reports/stock-by-quantity', [SellerReportController::class, 'stockByQuantity'])->name('seller.reports.stock_by_quantity');
 Route::get('seller/reports/stock-by-rating', [SellerReportController::class, 'stockByRating'])->name('seller.reports.stock_by_rating');
 Route::get('seller/reports/low-stock', [SellerReportController::class, 'lowStock'])->name('seller.reports.low_stock');
@@ -87,42 +88,6 @@ Route::prefix('seller/products')->name('seller.products.')->group(function () {
 
 // Protected seller routes
 Route::middleware(['auth'])->prefix('seller')->name('seller.')->group(function () {
-    // Dashboard sudah di-define di atas, jadi hanya route lain yang protected
-
-    // Reviews
-    Route::get('reviews', [SellerReviewController::class, 'index'])->name('reviews.index');
-    Route::post('reviews', [SellerReviewController::class, 'store'])->name('reviews.store');
-    Route::delete('reviews/{review}', [SellerReviewController::class, 'destroy'])->name('reviews.destroy');
-
-    // Profile
-    Route::get('profile/{seller}', [SellerProfileController::class, 'show'])->name('profile.show');
-// ... existing code ...
-    Route::put('profile/{seller}', [SellerProfileController::class, 'update'])->name('profile.update');
-});
-
-// TEMPORARY: Seller Products routes (akses tanpa login untuk development)
-Route::prefix('seller/products')->name('seller.products.')->group(function () {
-    Route::get('', [SellerProductController::class, 'index'])->name('index');
-    Route::get('create', [SellerProductController::class, 'create'])->name('create');
-    Route::post('', [SellerProductController::class, 'store'])->name('store');
-    Route::get('{product}', [SellerProductController::class, 'show'])->name('show');
-    Route::get('{product}/edit', [SellerProductController::class, 'edit'])->name('edit');
-    Route::put('{product}', [SellerProductController::class, 'update'])->name('update');
-    Route::delete('{product}', [SellerProductController::class, 'destroy'])->name('destroy');
-});
-
-// Protected seller routes
-Route::middleware(['auth'])->prefix('seller')->name('seller.')->group(function () {
-    // Dashboard sudah di-define di atas, jadi hanya route lain yang protected
-
-    // Reports (duplicate - routes exposed publicly during development above)
-    // The public report routes are declared earlier to allow access without authentication.
-    // Keep these commented while in dev to avoid route duplication and auth blocking.
-    // Route::get('reports/stock-by-quantity', [SellerReportController::class, 'stockByQuantity'])->name('reports.stock_by_quantity');
-    // Route::get('reports/stock-by-rating', [SellerReportController::class, 'stockByRating'])->name('reports.stock_by_rating');
-    // Route::get('reports/low-stock', [SellerReportController::class, 'lowStock'])->name('reports.low_stock');
-    // Route::get('reports/export/{type}', [SellerReportController::class, 'exportPdf'])->name('reports.export');
-
     // Reviews
     Route::get('reviews', [SellerReviewController::class, 'index'])->name('reviews.index');
     Route::post('reviews', [SellerReviewController::class, 'store'])->name('reviews.store');
@@ -144,27 +109,4 @@ Route::prefix('seller/api')->name('seller.api.')->group(function () {
     Route::get('data/reviews-summary', [SellerDataController::class, 'reviewsSummary'])->name('data.reviews_summary');
 });
 
-
-/*
-|--------------------------------------------------------------------------
-| Authenticated Routes (DINONAKTIFKAN SEMENTARA)
-|--------------------------------------------------------------------------
-| Ini adalah rute bawaan untuk Dashboard dan Profile.
-*/
-
-/*
-// Rute Dashboard (Bawaan) - Nonaktifkan sementara
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-// Rute Profile (Bawaan) - Nonaktifkan sementara
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-*/
-
-// Rute Autentikasi Bawaan (Login, Register User Biasa, Reset Password, dll.) - Nonaktifkan sementara
-// require __DIR__.'/auth.php';
+// ... (route autentikasi bawaan yang dinonaktifkan) ...

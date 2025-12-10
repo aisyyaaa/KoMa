@@ -13,22 +13,38 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            
+            // Relasi
             $table->foreignId('seller_id')->constrained()->onDelete('cascade');
             $table->foreignId('category_id')->constrained();
+            
+            // Data Dasar
             $table->string('name');
+            $table->string('slug')->unique(); // <-- DITAMBAHKAN: Untuk URL Detail
             $table->text('description');
+            
+            // Harga & Stok
             $table->decimal('price', 12, 2);
             $table->decimal('discount_price', 12, 2)->nullable();
             $table->integer('stock')->default(value: 0);
             $table->integer('min_stock')->default(value: 0);
             $table->string('sku')->unique();
+            
+            // Atribut
             $table->string('brand')->nullable();
             $table->enum('condition', ['new', 'used'])->default('new');
+            
+            // Dimensi/Pengiriman
             $table->decimal('weight', 8, 2)->nullable();
             $table->decimal('length', 8, 2)->nullable();
             $table->decimal('width', 8, 2)->nullable();
             $table->integer('warranty')->nullable(); 
-            $table->string('primary_images')->nullable(); 
+            
+            // Gambar (untuk sinkronisasi dengan Seeder)
+            // Mengganti primary_images menjadi primary_image (atau URL)
+            $table->string('primary_image')->nullable(); // <-- DITAMBAHKAN
+            $table->json('additional_images')->nullable(); // <-- DITAMBAHKAN
+            
             $table->timestamps();
         });
     }
