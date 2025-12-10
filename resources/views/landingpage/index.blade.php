@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KoMa Market - Katalog Produk</title>
+    <title>KoMa Market - Landing Page</title>
     @vite('resources/css/app.css')
     <style>
         .scrollbar-hide::-webkit-scrollbar {
@@ -33,8 +33,8 @@
         {{-- Baris Utama Logo & Search --}}
         <div class="container mx-auto px-4 py-4 flex items-center justify-between">
             
-            {{-- LOGO SEBAGAI LINK KE KATALOG --}}
-            <a href="{{ route('katalog.index') }}" class="text-2xl font-bold text-koma-primary hover:text-koma-danger transition duration-150">
+            {{-- LOGO SEBAGAI LINK KE LANDING PAGE --}}
+            <a href="{{ route('landingpage.index') }}" class="text-2xl font-bold text-koma-primary hover:text-koma-danger transition duration-150">
                 KoMa Market
             </a>
             
@@ -97,7 +97,7 @@
             <div class="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
                 
                 @php
-                    // Daftar Kategori Final dengan SVG Internal
+                    // Daftar Kategori Final dengan SVG INTERNAL
                     $categories = [
                         [
                             'name' => 'Alat Tulis & Kuliah', 

@@ -98,8 +98,8 @@
                         Logout
                     </button>
                 </form>
-                @else
-                <a href="{{ route('seller.auth.login') }}" 
+                     @else
+                     <a href="{{ route('login') }}" 
                    class="w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium text-koma-primary
                           hover:bg-koma-bg-light transition duration-200">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\Seller\Auth\SellerAuthController;
 use App\Http\Controllers\Seller\Auth\SellerVerificationController as SellerVerify;
 use App\Http\Controllers\Seller\SellerDashboardController;
@@ -10,6 +10,7 @@ use App\Http\Controllers\Seller\SellerReviewController;
 use App\Http\Controllers\Seller\SellerProfileController;
 use App\Http\Controllers\Seller\Api\SellerChartController;
 use App\Http\Controllers\Seller\Api\SellerDataController;
+use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,9 +20,9 @@ use Illuminate\Support\Facades\Route;
 | Rute yang dapat diakses oleh Pengunjung Umum
 */
 
-// 1. Halaman Utama / Katalog Produk (Sesuai instruksi dosen)
-// Tampilan depan web langsung katalog.
-Route::get('/', [CatalogController::class, 'index'])->name('katalog.index');
+// 1. Halaman Utama / Landing Page (Sesuai instruksi dosen)
+// Tampilan depan web langsung Landing Page.
+Route::get('/', [LandingPageController::class, 'index'])->name('landingpage.index');
 // 2. Registrasi Penjual (SRS-MartPlace-01)
 // Menampilkan formulir registrasi penjual (GET)
 Route::get('/register/seller', [SellerAuthController::class, 'showRegister'])->name('seller.register');
@@ -48,10 +49,12 @@ Route::post('seller/verify/resend', [SellerVerify::class, 'resend'])->name('sell
 // TEMPORARY: Seller Dashboard (akses tanpa login untuk development)
 Route::get(uri: 'seller/dashboard', action: [SellerDashboardController::class, 'index'])->name('seller.dashboard');
 
-// Dummy login route untuk development
-Route::get('login', function () {
-    return redirect('seller/login');
-})->name('login');
+// Public common login selection (pilihan akun: Pembeli / Penjual)
+Route::get('login', [AuthController::class, 'showLoginSelection'])->name('login');
+
+// Buyer registration (minimal)
+Route::get('buyer/register', [AuthController::class, 'showBuyerRegister'])->name('buyer.register');
+Route::post('buyer/register', [AuthController::class, 'registerBuyer'])->name('buyer.register.post');
 
 // TEMPORARY: placeholder routes for development (to avoid missing route errors)
 Route::get('seller/orders', function () {
