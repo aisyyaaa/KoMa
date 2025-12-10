@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Seller Panel') - KoMa Market</title>
     @vite('resources/css/app.css')
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
@@ -19,7 +20,9 @@
             
             {{-- APP LOGO/NAME --}}
             <div class="px-6 py-5 border-b border-gray-200">
-                <h1 class="text-xl font-extrabold text-koma-primary leading-tight">KoMa</h1>
+                <a href="{{ route('katalog.index')}}">
+                    <h1 class="text-xl font-extrabold text-koma-primary leading-tight">KoMa</h1>
+                </a>
                 <p class="text-xs text-gray-500 mt-1 font-medium">SELLER PANEL</p>
             </div>
 

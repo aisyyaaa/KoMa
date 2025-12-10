@@ -11,14 +11,11 @@ class SellerChartController extends Controller
 {
     public function stockPerProduct()
     {
-        $user = Auth::user();
-
-        if ($user && $user->seller) {
-            $products = $user->seller->products()->pluck('stock', 'name');
-        } else {
-            // fallback: top 10 products by stock across platform
-            $products = \App\Models\Product::orderBy('stock', 'desc')->limit(10)->pluck('stock', 'name');
-        }
+        $sellerId = optional(Auth::user())->seller->id ?? 1;
+        $products = \App\Models\Product::where('seller_id', $sellerId)
+            ->orderByDesc('stock')
+            ->limit(10)
+            ->pluck('stock', 'name');
 
         $labels = $products->keys()->values();
         $data = $products->values()->map(function ($v) { return (int) $v; })->values();
@@ -31,18 +28,13 @@ class SellerChartController extends Controller
 
     public function ratingPerProduct()
     {
-        $user = Auth::user();
-
-        if ($user && $user->seller) {
-            $products = $user->seller->products()->with('reviews')->get();
-        } else {
-            // fallback: top 10 products by total reviews across platform
-            $products = \App\Models\Product::with('reviews')
-                ->withCount('reviews')
-                ->orderBy('reviews_count', 'desc')
-                ->limit(10)
-                ->get();
-        }
+        $sellerId = optional(Auth::user())->seller->id ?? 1;
+        $products = \App\Models\Product::with('reviews')
+            ->where('seller_id', $sellerId)
+            ->withCount('reviews')
+            ->orderByDesc('reviews_count')
+            ->limit(10)
+            ->get();
 
         $labels = $products->pluck('name')->values();
         $data = $products->map(function ($product) {
@@ -58,22 +50,14 @@ class SellerChartController extends Controller
 
     public function ratingByProvince()
     {
-        $user = Auth::user();
+        $sellerId = optional(Auth::user())->seller->id ?? 1;
+        $productIds = \App\Models\Product::where('seller_id', $sellerId)->pluck('id');
 
-        if ($user && $user->seller) {
-            $productIds = $user->seller->products()->pluck('id');
-            $query = DB::table('reviews')
-                ->join('users', 'reviews.user_id', '=', 'users.id')
-                ->whereIn('reviews.product_id', $productIds)
-                ->select('users.province', DB::raw('AVG(reviews.rating) as average_rating'))
-                ->groupBy('users.province');
-        } else {
-            // fallback: platform-wide by province
-            $query = DB::table('reviews')
-                ->join('users', 'reviews.user_id', '=', 'users.id')
-                ->select('users.province', DB::raw('AVG(reviews.rating) as average_rating'))
-                ->groupBy('users.province');
-        }
+        $query = DB::table('reviews')
+            ->join('users', 'reviews.user_id', '=', 'users.id')
+            ->whereIn('reviews.product_id', $productIds)
+            ->select('users.province', DB::raw('AVG(reviews.rating) as average_rating'))
+            ->groupBy('users.province');
 
         $ratings = $query->pluck('average_rating', 'users.province');
 

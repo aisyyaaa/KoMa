@@ -16,7 +16,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm text-gray-500">Total Produk</p>
-                        <p id="total-products" class="text-xl font-bold text-gray-800">0</p>
+                        <p class="text-xl font-bold text-gray-800">{{ $stats['total_products'] ?? 0 }}</p>
                     </div>
                 </div>
             </div>
@@ -28,7 +28,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm text-gray-500">Rating Rata-Rata</p>
-                        <p id="average-rating" class="text-xl font-bold text-gray-800">0</p>
+                        <p class="text-xl font-bold text-gray-800">{{ $stats['average_rating'] ?? 0 }}</p>
                     </div>
                 </div>
             </div>
@@ -40,7 +40,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm text-gray-500">Stok Rendah</p>
-                        <p id="low-stock-products" class="text-xl font-bold text-gray-800">0</p>
+                        <p class="text-xl font-bold text-gray-800">{{ $stats['low_stock'] ?? 0 }}</p>
                     </div>
                 </div>
             </div>
@@ -52,7 +52,7 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-sm text-gray-500">Total Ulasan</p>
-                        <p id="total-reviews" class="text-xl font-bold text-gray-800">0</p>
+                        <p class="text-xl font-bold text-gray-800">{{ $stats['total_reviews'] ?? 0 }}</p>
                     </div>
                 </div>
             </div>
@@ -131,7 +131,6 @@
             charts: {},
 
             initSummary() {
-                this.initStatsCards();
                 this.initChart('salesTrendChart', 'line', {
                     labels: ['6 hari lalu','5 hari lalu','4 hari lalu','3 hari lalu','2 hari lalu','Kemarin','Hari ini'],
                     datasets: [{ label: 'Penjualan', data: [5,8,6,10,9,12,7], backgroundColor: 'rgba(59,130,246,0.2)', borderColor: 'rgba(59,130,246,1)', fill: true }]
@@ -150,31 +149,6 @@
 
             initCustomerCharts() {
                 this.fetchAndCreateChart("{{ route('seller.api.charts.rating_by_province') }}", 'raterLocationChart', 'bar', 'Rating', 'rgba(99,102,241,0.6)');
-            },
-
-            initStatsCards() {
-                const totalProductsEl = document.getElementById('total-products');
-                const lowStockEl = document.getElementById('low-stock-products');
-                const totalReviewsEl = document.getElementById('total-reviews');
-                const avgRatingEl = document.getElementById('average-rating');
-
-                if (typeof axios !== 'undefined') {
-                    axios.get("{{ route('seller.api.data.products_summary') }}")
-                        .then(res => {
-                            if (res.data && totalProductsEl && lowStockEl) {
-                                totalProductsEl.textContent = res.data.total_products;
-                                lowStockEl.textContent = res.data.low_stock;
-                            }
-                        }).catch(err => console.error('Error fetching product summary:', err));
-
-                    axios.get("{{ route('seller.api.data.reviews_summary') }}")
-                        .then(res => {
-                            if (res.data && totalReviewsEl && avgRatingEl) {
-                                totalReviewsEl.textContent = res.data.total_reviews;
-                                avgRatingEl.textContent = res.data.average_rating;
-                            }
-                        }).catch(err => console.error('Error fetching reviews summary:', err));
-                }
             },
 
             initChart(canvasId, type, data, options) {
@@ -212,4 +186,3 @@
     }
 </script>
 @endpush
-
