@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Seller;
 
 class AuthController extends Controller
 {
@@ -25,6 +27,52 @@ class AuthController extends Controller
     public function showBuyerRegister()
     {
         return view('auth.buyer-register');
+    }
+
+    /**
+     * Handle shared login for platform, seller, and buyer.
+     */
+    public function login(Request $request)
+    {
+        $data = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $email = $data['email'];
+        $password = $data['password'];
+
+        // 1) Platform admin (users table with is_platform_admin)
+        $user = User::where('email', $email)->first();
+        if ($user && $user->is_platform_admin) {
+            if (Auth::attempt(['email' => $email, 'password' => $password])) {
+                $request->session()->regenerate();
+                return redirect()->intended(route('platform.dashboard'));
+            }
+            return back()->withErrors(['email' => 'Credensial tidak cocok untuk akun platform'])->withInput();
+        }
+
+        // 2) Seller (match pic_email)
+        $seller = Seller::where('pic_email', $email)->first();
+        if ($seller) {
+            if (Hash::check($password, $seller->password)) {
+                Auth::login($seller);
+                $request->session()->regenerate();
+                return redirect()->intended(route('seller.dashboard'));
+            }
+            return back()->withErrors(['email' => 'Credensial tidak cocok untuk akun penjual'])->withInput();
+        }
+
+        // 3) Regular user (buyer)
+        if ($user) {
+            if (Auth::attempt(['email' => $email, 'password' => $password])) {
+                $request->session()->regenerate();
+                return redirect()->intended(route('landingpage.index'));
+            }
+            return back()->withErrors(['email' => 'Credensial tidak cocok untuk akun pengguna'])->withInput();
+        }
+
+        return back()->withErrors(['email' => 'Akun tidak ditemukan'])->withInput();
     }
 
     /**

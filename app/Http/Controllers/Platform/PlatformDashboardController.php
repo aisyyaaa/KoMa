@@ -10,6 +10,15 @@ use App\Models\Review;
 
 class PlatformDashboardController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (!auth()->check() || !auth()->user()->is_platform_admin) {
+                return redirect()->route('platform.auth.login');
+            }
+            return $next($request);
+        });
+    }
     public function index()
     {
         // gather stats for dashboard (SRS-07)

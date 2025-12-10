@@ -8,6 +8,15 @@ use App\Models\Seller;
 
 class PlatformSellerController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (!auth()->check() || !auth()->user()->is_platform_admin) {
+                return redirect()->route('platform.auth.login');
+            }
+            return $next($request);
+        });
+    }
     /**
      * Display a listing of the resource.
      */

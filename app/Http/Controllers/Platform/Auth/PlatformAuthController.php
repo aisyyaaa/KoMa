@@ -22,6 +22,12 @@ class PlatformAuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        // allow only users flagged as platform admin
+        $user = User::where('email', $data['email'])->first();
+        if (!$user || !$user->is_platform_admin) {
+            return back()->withErrors(['email' => 'Akun tidak memiliki akses platform atau tidak ditemukan'])->withInput();
+        }
+
         if (Auth::attempt(['email' => $data['email'], 'password' => $data['password']])) {
             $request->session()->regenerate();
             return redirect()->intended(route('platform.dashboard'));

@@ -1,19 +1,18 @@
-@extends('layouts.app')
+@extends('layouts.platform')
 
-@section('title', 'Platform Dashboard')
+@section('title', 'Dashboard Platform')
 
 @section('content')
-<div class="p-6">
-    <h1 class="text-2xl font-bold mb-4">Platform Dashboard</h1>
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Dashboard Platform</h1>
 
-    @include('platform.dashboard._stats-cards')
+        {{-- Stats Cards: Penjual Aktif/Tidak Aktif + Pengunjung yang Berkomentar --}}
+        @include('platform.dashboard._stats-cards')
 
-    <div class="mt-6">
-        @include('platform.dashboard._charts')
+        {{-- Charts: Produk per Kategori & Toko per Provinsi --}}
+        <div class="mt-6">
+            @include('platform.dashboard._charts')
+        </div>
     </div>
-
-    <div class="mt-6">
-        @include('platform.dashboard._recent-activities')
-    </div>
-</div>
 @endsection
+

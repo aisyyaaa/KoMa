@@ -11,7 +11,13 @@ use App\Http\Controllers\Seller\SellerProfileController;
 use App\Http\Controllers\Seller\Api\SellerChartController;
 use App\Http\Controllers\Seller\Api\SellerDataController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Platform\PlatformDashboardController;
+use App\Http\Controllers\Platform\PlatformAnalyticsController;
+use App\Http\Controllers\Platform\PlatformReportController;
+use App\Http\Controllers\Platform\Auth\PlatformAuthController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +57,15 @@ Route::get(uri: 'seller/dashboard', action: [SellerDashboardController::class, '
 
 // Public common login selection (pilihan akun: Pembeli / Penjual)
 Route::get('login', [AuthController::class, 'showLoginSelection'])->name('login');
+Route::post('login', [AuthController::class, 'login'])->name('login.post');
+
+// Global logout route used by various layouts (named 'logout')
+Route::post('logout', function (Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect('/');
+})->name('logout');
 
 // Buyer registration (minimal)
 Route::get('buyer/register', [AuthController::class, 'showBuyerRegister'])->name('buyer.register');
@@ -60,6 +75,27 @@ Route::post('buyer/register', [AuthController::class, 'registerBuyer'])->name('b
 Route::get('seller/orders', function () {
     return view('seller.placeholder', ['title' => 'Pesanan']);
 })->name('seller.orders.index');
+
+// Platform admin routes
+Route::prefix('platform')->name('platform.')->group(function () {
+    // Platform authentication
+    Route::get('auth/login', [PlatformAuthController::class, 'showLogin'])->name('auth.login');
+    Route::post('auth/login', [PlatformAuthController::class, 'login'])->name('auth.login.post');
+    Route::post('auth/logout', [PlatformAuthController::class, 'logout'])->name('auth.logout');
+
+    Route::get('dashboard', [PlatformDashboardController::class, 'index'])->name('dashboard');
+
+    // Analytics API for charts
+    Route::get('api/charts/products-per-category', [PlatformAnalyticsController::class, 'productsPerCategory'])->name('api.products_per_category');
+    Route::get('api/charts/sellers-per-province', [PlatformAnalyticsController::class, 'sellersPerProvince'])->name('api.sellers_per_province');
+    Route::get('api/stats', [PlatformAnalyticsController::class, 'stats'])->name('api.stats');
+
+    // Reports
+    Route::get('reports/active-sellers', [PlatformReportController::class, 'activeSellers'])->name('reports.active_sellers');
+    Route::get('reports/sellers-by-province', [PlatformReportController::class, 'sellersByProvince'])->name('reports.sellers_by_province');
+    Route::get('reports/products-by-rating', [PlatformReportController::class, 'productsByRating'])->name('reports.products_by_rating');
+    Route::get('reports/export/{type}', [PlatformReportController::class, 'exportPdf'])->name('reports.export');
+});
 
 // TEMPORARY: placeholder for reports index (used by dashboard links)
 // Route::get('seller/reports', function () {

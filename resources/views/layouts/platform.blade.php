@@ -1,36 +1,186 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Panel') - KoMa</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    @stack('styles')
+    <title>@yield('title', 'Platform Panel') - KoMa</title>
+    @vite('resources/css/app.css')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-gray-100">
-    <div class="flex h-screen bg-gray-200">
-        <!-- Sidebar -->
-        <div class="w-64 bg-gray-800 text-white p-4">
-            <h1 class="text-2xl font-bold mb-6">Admin Panel</h1>
-            <nav>
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Dashboard</a>
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Sellers</a>
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Reports</a>
-                <a href="#" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">Logout</a>
+<body class="bg-gray-50">
+
+    <x-notification />
+
+    <div class="flex h-screen">
+        
+        {{-- SIDEBAR --}}
+        <div class="w-56 bg-white border-r border-gray-200 flex flex-col shadow-md">
+            
+            {{-- APP LOGO/NAME --}}
+            <div class="px-6 py-5 border-b border-gray-200">
+                <h1 class="text-xl font-extrabold text-koma-primary leading-tight">KoMa</h1>
+                <p class="text-xs text-gray-500 mt-1 font-medium">PLATFORM ADMIN</p>
+            </div>
+
+            {{-- SIDEBAR MENU --}}
+            <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                
+                {{-- Dashboard --}}
+                <a href="{{ route('platform.dashboard') }}" 
+                   class="flex items-center px-4 py-2.5 rounded-lg text-sm font-medium 
+                          {{ request()->routeIs('platform.dashboard') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-100' }} 
+                          transition duration-200">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 11l4-4m0 0l4 4m-4-4v4"></path>
+                    </svg>
+                    Dashboard
+                </a>
+
+                {{-- Laporan (dropdown) --}}
+                <div x-data="{ open: {{ request()->routeIs('platform.reports.*') ? 'true' : 'false' }} }" class="">
+                    <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium 
+                          {{ request()->routeIs('platform.reports.*') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-100' }} 
+                          transition duration-150">
+                        <span class="flex items-center">
+                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Laporan
+                        </span>
+                        <svg :class="open ? 'transform rotate-180' : ''" class="w-4 h-4 text-gray-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+
+                    <div x-show="open" x-collapse class="mt-2 space-y-1 px-1">
+                        <a href="{{ route('platform.reports.active_sellers') }}" 
+                           class="group flex items-center px-4 py-2 rounded-md text-sm font-medium w-full 
+                                {{ request()->routeIs('platform.reports.active_sellers') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
+                            Laporan Penjual Aktif
+                        </a>
+                        <a href="{{ route('platform.reports.sellers_by_province') }}" 
+                           class="group flex items-center px-4 py-2 rounded-md text-sm font-medium w-full 
+                                {{ request()->routeIs('platform.reports.sellers_by_province') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
+                            Laporan Penjual Lokasi
+                        </a>
+                        <a href="{{ route('platform.reports.products_by_rating') }}" 
+                           class="group flex items-center px-4 py-2 rounded-md text-sm font-medium w-full 
+                                {{ request()->routeIs('platform.reports.products_by_rating') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
+                            Laporan Daftar Produk
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Pengaturan --}}
+                <a href="#" 
+                   class="flex items-center px-4 py-2.5 rounded-lg text-sm font-medium text-gray-700
+                          hover:bg-gray-100 transition duration-150">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Pengaturan
+                </a>
+
             </nav>
+
+            {{-- LOGOUT BUTTON --}}
+            <div class="px-3 py-3 border-t border-gray-200">
+                @if(auth()->check())
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" 
+                            class="w-full flex items-center px-4 py-2.5 rounded-lg text-sm font-medium text-red-600
+                                   hover:bg-red-50 transition duration-150">
+                        <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                        Logout
+                    </button>
+                </form>
+                @else
+                <a href="{{ route('platform.auth.login') }}" 
+                   class="w-full flex items-center px-4 py-2.5 rounded-lg text-sm font-medium text-koma-primary
+                          hover:bg-gray-100 transition duration-150">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3v-1"></path>
+                    </svg>
+                    Login
+                </a>
+                @endif
+            </div>
+
         </div>
 
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden">
-            <header class="bg-white shadow p-4">
-                <h2 class="text-xl font-semibold">@yield('title', 'Page Title')</h2>
-            </header>
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200 p-6">
+        {{-- MAIN CONTENT --}}
+        <div class="flex-1 flex flex-col">
+            
+            {{-- NAVBAR --}}
+            <nav class="bg-white shadow-sm border-b border-gray-200 h-14 flex items-center px-5">
+                <div class="flex items-center justify-between w-full">
+                    
+                    {{-- SEARCH BAR --}}
+                    <div class="flex-1 max-w-md">
+                        <div class="relative">
+                            <input type="text" placeholder="Cari..." 
+                                   class="w-full px-3 py-2 rounded-lg bg-gray-100 border-0 focus:ring-2 focus:ring-koma-primary focus:bg-white text-sm">
+                            <svg class="w-4 h-4 text-gray-400 absolute right-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    {{-- PROFILE SECTION --}}
+                    <div class="flex items-center space-x-2.5 ml-6">
+                        
+                        {{-- ADMIN NAME --}}
+                        <div class="text-right">
+                            @if(auth()->check())
+                            <p class="text-xs font-semibold text-gray-900">{{ auth()->user()->name }}</p>
+                            <p class="text-xs text-gray-500">Platform Admin</p>
+                            @else
+                            <p class="text-xs font-semibold text-gray-900">Platform</p>
+                            <p class="text-xs text-gray-500">Admin Panel</p>
+                            @endif
+                        </div>
+
+                        {{-- PROFILE AVATAR --}}
+                        <div class="w-7 h-7 rounded-full bg-koma-primary text-white flex items-center justify-center text-xs font-semibold">
+                            @if(auth()->check())
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            @else
+                            P
+                            @endif
+                        </div>
+
+                    </div>
+
+                </div>
+            </nav>
+
+            {{-- PAGE CONTENT --}}
+            <main class="flex-1 overflow-y-auto p-6">
                 @yield('content')
             </main>
+
         </div>
     </div>
-
+    
     @stack('scripts')
+    @if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.dispatchEvent(new CustomEvent('show-notification', { detail: { type: 'success', message: {!! json_encode(session('success')) !!} } }));
+        });
+    </script>
+    @endif
+    @if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            window.dispatchEvent(new CustomEvent('show-notification', { detail: { type: 'error', message: {!! json_encode(session('error')) !!} } }));
+        });
+    </script>
+    @endif
 </body>
 </html>

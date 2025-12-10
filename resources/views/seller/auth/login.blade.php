@@ -51,7 +51,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('seller.auth.login.post') }}" method="POST">
+                <form action="{{ route('login.post') }}" method="POST">
                     @csrf
 
                     <div class="mb-4">
