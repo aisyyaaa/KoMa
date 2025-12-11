@@ -15,12 +15,17 @@ class PlatformUserSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'platform@koma.com'],
+            // Kunci unik: email
+            ['email' => 'admin@koma.com'],
             [
-                'name' => 'Platform Admin',
-                'password' => Hash::make('password'),
-                'is_platform_admin' => true,
+                'name' => 'Master Admin Platform',
+                'password' => Hash::make('password123'), // Gunakan password yang disarankan
+                'role' => 'platform', // <<< PENTING: Gunakan role 'platform'
+                'province' => 'DKI Jakarta', // Tambahkan data province yang wajib di Model
+                // Hapus 'is_platform_admin' karena tidak ada di Model User Anda
             ]
         );
+        
+        $this->command->info('Akun Master Admin Platform berhasil dibuat: admin@koma.com / password123');
     }
 }

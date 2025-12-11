@@ -15,35 +15,44 @@ return new class extends Migration
         Schema::create('sellers', function (Blueprint $table) {
             $table->id();
             
-            // Data Toko
-            $table->string('store_name');
-            $table->text('store_description')->nullable();
+            // --- DATA TOKO (SRS-MartPlace-01: Elemen 1 & 2) ---
+            $table->string('store_name')->unique(); // Nama toko
+            // Mengganti 'store_description' dengan 'short_description' (lebih sesuai dengan field Controller)
+            $table->string('short_description', 500)->nullable(); // Deskripsi singkat
             
-            // Data PIC
-            $table->string('pic_name');
-            $table->string('pic_phone')->unique();
-            $table->string('pic_email')->unique();
-            
-            // Detail Alamat PIC
-            $table->string('pic_street');
-            $table->string('pic_rt');
-            $table->string('pic_rw');
-            $table->string('pic_village');
-            $table->string('pic_district'); // <-- KOLOM KECAMATAN
-            $table->string('pic_city');
-            $table->string('pic_province');
-            
-            // Dokumen PIC
-            $table->string('pic_ktp_number')->unique();
-            $table->string('pic_photo_path');
-            $table->string('pic_ktp_file_path');
-            
-            // Status dan Akun
-            $table->enum('status', ['PENDING', 'ACTIVE', 'REJECTED'])->default('PENDING');
-            $table->timestamp('email_verified_at')->nullable();
+            // --- DATA PIC & AKUN (SRS-MartPlace-01: Elemen 3, 4, 5, dan Akun) ---
+            $table->string('pic_name'); // Nama PIC
+            // Mengganti 'pic_phone' menjadi 'phone_number' (konsistensi)
+            $table->string('phone_number', 15)->unique(); // No Handphone PIC
+            $table->string('email')->unique(); // Mengganti pic_email menjadi email (Standar Laravel untuk Auth)
             $table->string('password');
+            
+            // --- DETAIL ALAMAT PIC (SRS-MartPlace-01: Elemen 6 s/d 11) ---
+            // Mengganti 'pic_street' menjadi 'address' (konsistensi dengan Controller)
+            $table->string('address'); // Alamat (nama jalan) PIC
+            $table->string('rt', 5);
+            $table->string('rw', 5);
+            $table->string('village', 100); // Nama kelurahan
+            $table->string('district', 100); // Nama Kecamatan (Sesuai Permintaan)
+            $table->string('city', 100); // Kabupaten/Kota
+            $table->string('province', 100); // Provinsi
+            
+            // --- DOKUMEN PIC (SRS-MartPlace-01: Elemen 12 s/d 14) ---
+            $table->string('ktp_number', 20)->unique(); // Mengganti 'pic_ktp_number'
+            $table->string('pic_photo_path'); // Path Foto PIC
+            $table->string('ktp_file_path'); // Path File KTP PIC
+            
+            // --- STATUS AKUN & VERIFIKASI (SRS-MartPlace-02) ---
+            // Status Verifikasi (Misalnya: pending, approved, rejected)
+            $table->enum('verification_status', ['pending', 'approved', 'rejected'])->default('pending'); 
+            // Status Akun Aktif/Tidak Aktif (Digunakan saat Login)
+            $table->boolean('is_active')->default(false); // Status aktif akun (true jika sudah di-approve Platform)
+            
+            // Mencatat tanggal dan waktu pendaftaran (SRS-MartPlace-02)
+            $table->timestamp('registration_date')->nullable(); 
+
             $table->rememberToken();
-            $table->timestamps();
+            $table->timestamps(); // created_at (kapan data dibuat) dan updated_at
         });
     }
 

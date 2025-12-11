@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Seller;
-use App\Models\User;
+use Illuminate\Support\Facades\Hash; // Diperlukan untuk hashing password
 
 class SellerSeeder extends Seeder
 {
@@ -14,88 +14,101 @@ class SellerSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seller Aktif 1: Toko Buku ABC (Diperbarui dengan pic_district)
+        // Password default yang digunakan untuk semua akun: 'password'
+        $defaultPassword = Hash::make('password');
+
+        // Seller Aktif 1: Toko Buku ABC (AKUN UTAMA UNTUK TESTING LOGIN)
         Seller::create([
             'store_name' => 'Toko Buku ABC',
-            'store_description' => 'Toko buku online terlengkap',
+            'short_description' => 'Toko buku online terlengkap', // ✅ SESUAI MODEL & MIGRATION
             'pic_name' => 'Test User',
-            'pic_phone' => '081234567890',
-            'pic_email' => 'seller@example.com',
-            'pic_street' => 'Jl. ABC No. 123',
-            'pic_rt' => '01',
-            'pic_rw' => '02',
-            'pic_village' => 'Kelurahan ABC',
-            'pic_district' => 'Kecamatan XYZ', // <-- DIPERTAHANKAN
-            'pic_city' => 'Kota ABC',
-            'pic_province' => 'Provinsi ABC',
-            'pic_ktp_number' => '1234567890123456',
+            'phone_number' => '081234567890', // ✅ SESUAI MODEL & MIGRATION
+            'email' => 'seller@example.com', // ✅ SESUAI MODEL & MIGRATION
+            
+            // Detail Alamat
+            'address' => 'Jl. ABC No. 123', // ✅ SESUAI MODEL & MIGRATION
+            'rt' => '01',
+            'rw' => '02',
+            'village' => 'Kelurahan ABC',
+            'district' => 'Kecamatan XYZ', // ✅ SESUAI MODEL & MIGRATION
+            'city' => 'Kota ABC',
+            'province' => 'Provinsi ABC',
+            
+            // Dokumen & Status
+            'ktp_number' => '1234567890123456', // ✅ SESUAI MODEL & MIGRATION
             'pic_photo_path' => 'sellers/photos/default.png',
-            'pic_ktp_file_path' => 'sellers/ktp/default.png',
-            'status' => 'ACTIVE',
-            'password' => bcrypt('password'),
+            'ktp_file_path' => 'sellers/ktp/default.png',
+            
+            // STATUS AKTIF (SRS-MartPlace-02)
+            'verification_status' => 'approved', // ✅
+            'is_active' => true,                 // ✅ Kunci untuk bisa login
+            'password' => $defaultPassword,
         ]);
         
-        // Seller Aktif 2: KoMa Stationery (DIPERTAHANKAN dari versi Lokal Anda)
+        // Seller Aktif 2: KoMa Stationery
         Seller::create([
             'store_name' => 'KoMa Stationery',
-            'store_description' => 'Menjual perlengkapan kuliah termurah.',
+            'short_description' => 'Menjual perlengkapan kuliah termurah.',
             'pic_name' => 'Budi Santoso',
-            'pic_phone' => '087654321000',
-            'pic_email' => 'koma.seller@example.com',
-            'pic_street' => 'Jalan Merdeka Raya',
-            'pic_rt' => '05',
-            'pic_rw' => '01',
-            'pic_village' => 'Kelurahan Jaya',
-            'pic_district' => 'Kecamatan Sentosa', // <-- DIPERTAHANKAN
-            'pic_city' => 'Kota Bandung',
-            'pic_province' => 'Jawa Barat',
-            'pic_ktp_number' => '9876543210987654',
+            'phone_number' => '087654321000',
+            'email' => 'koma.seller@example.com',
+            'address' => 'Jalan Merdeka Raya',
+            'rt' => '05',
+            'rw' => '01',
+            'village' => 'Kelurahan Jaya',
+            'district' => 'Kecamatan Sentosa', 
+            'city' => 'Kota Bandung',
+            'province' => 'Jawa Barat',
+            'ktp_number' => '9876543210987654',
             'pic_photo_path' => 'sellers/photos/default2.png',
-            'pic_ktp_file_path' => 'sellers/ktp/default2.png',
-            'status' => 'ACTIVE',
-            'password' => bcrypt('password'),
+            'ktp_file_path' => 'sellers/ktp/default2.png',
+            'verification_status' => 'approved', 
+            'is_active' => true,
+            'password' => $defaultPassword,
         ]);
 
-        // Seller Nonaktif 1 (DITAMBAHKAN dari versi Incoming)
+        // Seller Nonaktif 1 (REJECTED)
         Seller::create([
             'store_name' => 'Toko Lama',
-            'store_description' => 'Toko lama, sudah tidak aktif',
+            'short_description' => 'Toko lama, sudah tidak aktif',
             'pic_name' => 'Budi',
-            'pic_phone' => '081100000001',
-            'pic_email' => 'budi@example.com',
-            'pic_street' => 'Jl. Lama 1',
-            'pic_rt' => '02',
-            'pic_rw' => '03',
-            'pic_village' => 'Kelurahan Lama',
-            'pic_district' => 'Kecamatan Lama', // <-- Ditambahkan agar sesuai skema database Anda
-            'pic_city' => 'Kota Lama',
-            'pic_province' => 'Provinsi Lama',
-            'pic_ktp_number' => '2222333344445555',
+            'phone_number' => '081100000001',
+            'email' => 'budi@example.com',
+            'address' => 'Jl. Lama 1',
+            'rt' => '02',
+            'rw' => '03',
+            'village' => 'Kelurahan Lama',
+            'district' => 'Kecamatan Lama', 
+            'city' => 'Kota Lama',
+            'province' => 'Provinsi Lama',
+            'ktp_number' => '2222333344445555',
             'pic_photo_path' => 'sellers/photos/default.png',
-            'pic_ktp_file_path' => 'sellers/ktp/default.png',
-            'status' => 'REJECTED',
-            'password' => bcrypt('password'),
+            'ktp_file_path' => 'sellers/ktp/default.png',
+            'verification_status' => 'rejected', // ✅ Ditolak
+            'is_active' => false,                 // ✅ Tidak aktif
+            'password' => $defaultPassword,
         ]);
 
-        // Seller Nonaktif 2 (DITAMBAHKAN dari versi Incoming)
+        // Seller Nonaktif 2 (PENDING - Belum diverifikasi)
         Seller::create([
-            'store_name' => 'Toko Nonaktif',
-            'store_description' => 'Contoh penjual nonaktif',
+            'store_name' => 'Toko Menunggu',
+            'short_description' => 'Contoh penjual menunggu verifikasi',
             'pic_name' => 'Siti',
-            'pic_phone' => '081100000002',
-            'pic_email' => 'siti@example.com',
-            'pic_street' => 'Jl. Nonaktif 5',
-            'pic_rt' => '03',
-            'pic_rw' => '04',
-            'pic_village' => 'Kelurahan Non',
-            'pic_district' => 'Kecamatan Non', // <-- Ditambahkan agar sesuai skema database Anda
-            'pic_city' => 'Kota Non',
-            'pic_province' => 'Provinsi Non',
-            'pic_ktp_number' => '5555444433332222',
+            'phone_number' => '081100000002',
+            'email' => 'siti@example.com',
+            'address' => 'Jl. Nonaktif 5',
+            'rt' => '03',
+            'rw' => '04',
+            'village' => 'Kelurahan Non',
+            'district' => 'Kecamatan Non', 
+            'city' => 'Kota Non',
+            'province' => 'Provinsi Non',
+            'ktp_number' => '5555444433332222',
             'pic_photo_path' => 'sellers/photos/default.png',
-            'pic_ktp_file_path' => 'sellers/ktp/default.png',
-            'status' => 'REJECTED',
-            'password' => bcrypt('password'),
+            'ktp_file_path' => 'sellers/ktp/default.png',
+            'verification_status' => 'pending', // ✅ Menunggu
+            'is_active' => false,               // ✅ Tidak aktif
+            'password' => $defaultPassword,
         ]);
     }
 }

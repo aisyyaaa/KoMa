@@ -84,35 +84,35 @@
                     <div class="step-content" id="step-1">
                         <h3 class="text-sm font-semibold text-koma-text-dark border-b pb-2 mb-3">1. Informasi Toko</h3>
                     <div class="mb-4">
-                        <label for="storeName" class="block text-xs font-medium text-gray-700 mb-1">
+                        <label for="store_name" class="block text-xs font-medium text-gray-700 mb-1">
                             Nama Toko <span class="text-koma-danger">*</span>
                         </label>
                         <input 
                             type="text" 
-                            name="storeName" 
-                            id="storeName" 
-                            value="{{ old('storeName') }}" 
+                            name="store_name" 
+                            id="store_name" 
+                            value="{{ old('store_name') }}" 
                             class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                    focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                   @error('storeName') border-red-500 @enderror" 
+                                   @error('store_name') border-red-500 @enderror" 
                             placeholder="Contoh: Toko Buku KoMa Jaya" 
                             required>
-                        @error('storeName') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        @error('store_name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                     <div class="mb-4">
-                        <label for="storeDescription" class="block text-xs font-medium text-gray-700 mb-1">
+                        <label for="store_description" class="block text-xs font-medium text-gray-700 mb-1">
                             Deskripsi Toko (Opsional)
                         </label>
                         <input 
                             type="text" 
-                            name="storeDescription" 
-                            id="storeDescription" 
-                            value="{{ old('storeDescription') }}" 
+                            name="store_description" 
+                            id="store_description" 
+                            value="{{ old('store_description') }}" 
                             class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                    focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                   @error('storeDescription') border-red-500 @enderror"
+                                   @error('store_description') border-red-500 @enderror"
                             placeholder="Contoh: Jual perlengkapan kuliah dan kos murah">
-                        @error('storeDescription') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        @error('store_description') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                     </div>
 
@@ -121,75 +121,75 @@
                         <h3 class="text-sm font-semibold text-koma-text-dark border-b pb-2 mb-3">2. Data Penanggung Jawab (PIC)</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="picName" class="block text-xs font-medium text-gray-700 mb-1">
+                            <label for="pic_name" class="block text-xs font-medium text-gray-700 mb-1">
                                 Nama Lengkap PIC <span class="text-koma-danger">*</span>
                             </label>
                             <input 
                                 type="text" 
-                                name="picName" 
-                                id="picName" 
-                                value="{{ old('picName') }}" 
+                                name="pic_name" 
+                                id="pic_name" 
+                                value="{{ old('pic_name') }}" 
                                 class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                        focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                       @error('picName') border-red-500 @enderror" 
+                                       @error('pic_name') border-red-500 @enderror" 
                                 placeholder="Contoh: Budi Santoso" 
                                 required>
-                            @error('picName') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('pic_name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <label for="picKtpNumber" class="block text-xs font-medium text-gray-700 mb-1">
+                            <label for="pic_ktp_number" class="block text-xs font-medium text-gray-700 mb-1">
                                 Nomor KTP (16 Digit) <span class="text-koma-danger">*</span>
                             </label>
                             <input 
                                 type="text" 
-                                name="picKtpNumber" 
-                                id="picKtpNumber" 
-                                value="{{ old('picKtpNumber') }}" 
+                                name="pic_ktp_number" 
+                                id="pic_ktp_number" 
+                                value="{{ old('pic_ktp_number') }}" 
                                 maxlength="16" 
                                 inputmode="numeric" 
                                 pattern="\d{16}" 
                                 class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                        focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                       @error('picKtpNumber') border-red-500 @enderror" 
+                                       @error('pic_ktp_number') border-red-500 @enderror" 
                                 placeholder="3302xxxxxxxxxxxx" 
                                 required>
                             <p id="ktp-feedback" class="text-red-500 text-xs mt-1 hidden">NIK harus 16 digit angka</p>
-                            @error('picKtpNumber') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('pic_ktp_number') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <label for="picPhone" class="block text-xs font-medium text-gray-700 mb-1">
+                            <label for="pic_phone" class="block text-xs font-medium text-gray-700 mb-1">
                                 Nomor Telepon PIC <span class="text-koma-danger">*</span>
                             </label>
                             <input 
                                 type="tel" 
-                                name="picPhone" 
-                                id="picPhone" 
-                                value="{{ old('picPhone') }}" 
+                                name="pic_phone" 
+                                id="pic_phone" 
+                                value="{{ old('pic_phone') }}" 
                                 maxlength="15" 
                                 inputmode="tel" 
                                 class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                        focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                       @error('picPhone') border-red-500 @enderror" 
+                                       @error('pic_phone') border-red-500 @enderror" 
                                 placeholder="081234567890" 
                                 required>
                             <p id="phone-feedback" class="text-red-500 text-xs mt-1 hidden">Format telepon tidak valid</p>
-                            @error('picPhone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('pic_phone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <label for="picEmail" class="block text-xs font-medium text-gray-700 mb-1">
+                            <label for="pic_email" class="block text-xs font-medium text-gray-700 mb-1">
                                 Email PIC <span class="text-koma-danger">*</span>
                             </label>
                             <input 
                                 type="email" 
-                                name="picEmail" 
-                                id="picEmail" 
-                                value="{{ old('picEmail') }}" 
+                                name="pic_email" 
+                                id="pic_email" 
+                                value="{{ old('pic_email') }}" 
                                 class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                        focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                       @error('picEmail') border-red-500 @enderror" 
+                                       @error('pic_email') border-red-500 @enderror" 
                                 placeholder="pic_koma@gmail.com" 
                                 required>
-                            @error('picEmail') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('pic_email') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
                     </div>
@@ -199,124 +199,124 @@
                         <h3 class="text-sm font-semibold text-koma-text-dark border-b pb-2 mb-3">3. Alamat Lengkap PIC</h3>
                     
                     <div class="mb-4">
-                        <label for="picStreet" class="block text-xs font-medium text-gray-700 mb-1">
+                        <label for="pic_street" class="block text-xs font-medium text-gray-700 mb-1">
                             Nama Jalan/Perumahan <span class="text-koma-danger">*</span>
                         </label>
                         <input 
                             type="text" 
-                            name="picStreet" 
-                            id="picStreet" 
-                            value="{{ old('picStreet') }}" 
+                            name="pic_street" 
+                            id="pic_street" 
+                            value="{{ old('pic_street') }}" 
                             class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                    focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                   @error('picStreet') border-red-500 @enderror" 
+                                   @error('pic_street') border-red-500 @enderror" 
                             placeholder="Contoh: Jl. Maju Makmur No. 12" 
                             required>
-                        @error('picStreet') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        @error('pic_street') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label for="picRT" class="block text-xs font-medium text-gray-700 mb-1">
+                            <label for="pic_rt" class="block text-xs font-medium text-gray-700 mb-1">
                                 RT <span class="text-koma-danger">*</span>
                             </label>
                             <input 
                                 type="text" 
-                                name="picRT" 
-                                id="picRT" 
-                                value="{{ old('picRT') }}" 
+                                name="pic_rt" 
+                                id="pic_rt" 
+                                value="{{ old('pic_rt') }}" 
                                 class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                        focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                       @error('picRT') border-red-500 @enderror" 
+                                       @error('pic_rt') border-red-500 @enderror" 
                                 placeholder="005" 
                                 required>
-                            @error('picRT') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('pic_rt') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <label for="picRW" class="block text-xs font-medium text-gray-700 mb-1">
+                            <label for="pic_rw" class="block text-xs font-medium text-gray-700 mb-1">
                                 RW <span class="text-koma-danger">*</span>
                             </label>
                             <input 
                                 type="text" 
-                                name="picRW" 
-                                id="picRW" 
-                                value="{{ old('picRW') }}" 
+                                name="pic_rw" 
+                                id="pic_rw" 
+                                value="{{ old('pic_rw') }}" 
                                 class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                        focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                       @error('picRW') border-red-500 @enderror" 
+                                       @error('pic_rw') border-red-500 @enderror" 
                                 placeholder="002" 
                                 required>
-                            @error('picRW') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('pic_rw') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label for="picVillage" class="block text-xs font-medium text-gray-700 mb-1">
+                            <label for="pic_village" class="block text-xs font-medium text-gray-700 mb-1">
                                 Desa/Kelurahan <span class="text-koma-danger">*</span>
                             </label>
                             <input 
                                 type="text" 
-                                name="picVillage" 
-                                id="picVillage" 
-                                value="{{ old('picVillage') }}" 
+                                name="pic_village" 
+                                id="pic_village" 
+                                value="{{ old('pic_village') }}" 
                                 class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                        focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                       @error('picVillage') border-red-500 @enderror" 
+                                       @error('pic_village') border-red-500 @enderror" 
                                 placeholder="Mawar" 
                                 required>
-                            @error('picVillage') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('pic_village') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <label for="picDistrict" class="block text-xs font-medium text-gray-700 mb-1">
+                            <label for="pic_district" class="block text-xs font-medium text-gray-700 mb-1">
                                 Kecamatan <span class="text-koma-danger">*</span>
                             </label>
                             <input 
                                 type="text" 
-                                name="picDistrict" 
-                                id="picDistrict" 
-                                value="{{ old('picDistrict') }}" 
+                                name="pic_district" 
+                                id="pic_district" 
+                                value="{{ old('pic_district') }}" 
                                 class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                        focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                       @error('picDistrict') border-red-500 @enderror" 
+                                       @error('pic_district') border-red-500 @enderror" 
                                 placeholder="Melati" 
                                 required>
-                            @error('picDistrict') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('pic_district') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label for="picCity" class="block text-xs font-medium text-gray-700 mb-1">
+                            <label for="pic_city" class="block text-xs font-medium text-gray-700 mb-1">
                                 Kota/Kabupaten <span class="text-koma-danger">*</span>
                             </label>
                             <input 
                                 type="text" 
-                                name="picCity" 
-                                id="picCity" 
-                                value="{{ old('picCity') }}" 
+                                name="pic_city" 
+                                id="pic_city" 
+                                value="{{ old('pic_city') }}" 
                                 class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                        focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                       @error('picCity') border-red-500 @enderror" 
+                                       @error('pic_city') border-red-500 @enderror" 
                                 placeholder="Jakarta Pusat" 
                                 required>
-                            @error('picCity') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('pic_city') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <label for="picProvince" class="block text-xs font-medium text-gray-700 mb-1">
+                            <label for="pic_province" class="block text-xs font-medium text-gray-700 mb-1">
                                 Provinsi <span class="text-koma-danger">*</span>
                             </label>
                             <input 
                                 type="text" 
-                                name="picProvince" 
-                                id="picProvince" 
-                                value="{{ old('picProvince') }}" 
+                                name="pic_province" 
+                                id="pic_province" 
+                                value="{{ old('pic_province') }}" 
                                 class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
                                        focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                       @error('picProvince') border-red-500 @enderror" 
+                                       @error('pic_province') border-red-500 @enderror" 
                                 placeholder="DKI Jakarta" 
                                 required>
-                            @error('picProvince') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            @error('pic_province') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
                     </div>
@@ -328,38 +328,65 @@
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="picPhoto" class="block text-xs font-medium text-gray-700 mb-1">
+                            <label for="pic_photo" class="block text-xs font-medium text-gray-700 mb-1">
                                 Foto PIC (Max 2MB) <span class="text-koma-danger">*</span>
                             </label>
                             <input 
                                 type="file" 
-                                name="picPhoto" 
-                                id="picPhoto" 
+                                name="pic_photo" 
+                                id="pic_photo" 
                                 class="w-full text-xs text-gray-500 
                                        file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold 
                                        file:bg-koma-hover-light file:text-koma-accent hover:file:bg-koma-bg-light
-                                       @error('picPhoto') border-red-500 @enderror">
-                            @error('picPhoto') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                       @error('pic_photo') border-red-500 @enderror">
+                            @error('pic_photo') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <label for="picKtpFile" class="block text-xs font-medium text-gray-700 mb-1">
+                            <label for="pic_ktp_file" class="block text-xs font-medium text-gray-700 mb-1">
                                 Scan KTP (Max 5MB) <span class="text-koma-danger">*</span>
                             </label>
                             <input 
                                 type="file" 
-                                name="picKtpFile" 
-                                id="picKtpFile" 
+                                name="pic_ktp_file" 
+                                id="pic_ktp_file" 
                                 class="w-full text-xs text-gray-500 
                                        file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold 
                                        file:bg-koma-hover-light file:text-koma-accent hover:file:bg-koma-bg-light
-                                       @error('picKtpFile') border-red-500 @enderror">
-                            @error('picKtpFile') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                       @error('pic_ktp_file') border-red-500 @enderror">
+                            @error('pic_ktp_file') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
+                    </div>
+                    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                        <label for="password" class="block text-xs font-medium text-gray-700 mb-1">
+                            Password <span class="text-koma-danger">*</span>
+                        </label>
+                        <input 
+                            type="password" 
+                            name="password" 
+                            id="password" 
+                            class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
+                                   focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
+                                   @error('password') border-red-500 @enderror" 
+                            placeholder="Minimal 6 karakter" 
+                            required>
+                        @error('password') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+
+                        <label for="password_confirmation" class="block text-xs font-medium text-gray-700 mb-1 mt-3">
+                            Konfirmasi Password <span class="text-koma-danger">*</span>
+                        </label>
+                        <input 
+                            type="password" 
+                            name="password_confirmation" 
+                            id="password_confirmation" 
+                            class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
+                                   focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent"
+                            placeholder="Ulangi password" 
+                            required>
                     </div>
                     </div>
 
                     {{-- BUTTONS --}}
-                    <div class="flex gap-3 mt-8" id="buttonContainer">
+                    <div class="flex gap-3 mt-6" id="buttonContainer">
                         <button 
                             type="button" 
                             id="prevBtn"
@@ -507,9 +534,9 @@
             showStep(currentStep);
         });
 
-        const ktpInput = document.getElementById('picKtpNumber');
+        const ktpInput = document.getElementById('pic_ktp_number');
         const ktpFeedback = document.getElementById('ktp-feedback');
-        const phoneInput = document.getElementById('picPhone');
+        const phoneInput = document.getElementById('pic_phone');
         const phoneFeedback = document.getElementById('phone-feedback');
 
         // --- Validasi NIK (Real-time) ---
