@@ -31,30 +31,37 @@
         <div class="lg:col-span-2 space-y-6">
             
             {{-- MAIN IMAGE & THUMBNAILS --}}
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-6" x-data="{ mainImage: '{{ $product->primary_image ? Storage::url($product->primary_image) : asset('storage/placeholder/default.png') }}' }">
+                
+                {{-- KOREKSI 1: Menggunakan Storage::url dan variabel Alpine.js 'mainImage' --}}
                 <div class="bg-gray-100 rounded-lg flex items-center justify-center h-96 mb-4 overflow-hidden">
-                    @if($product->primary_image_url)
-                        <img src="{{ $product->primary_image_url }}" alt="{{ $product->name }}" class="max-w-full max-h-full object-contain">
-                    @else
-                        <svg class="w-24 h-24 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    @endif
+                    <img :src="mainImage" alt="{{ $product->name }}" class="max-w-full max-h-full object-contain">
                 </div>
+                
                 <div class="grid grid-cols-5 gap-3">
                     @php
-                        $additional = $product->additional_image_urls ?? [];
+                        // Menggunakan primary_image dari DB (string) dan additional_images (JSON)
                         $images = [];
-                        if ($product->primary_image_url) {
-                            $images[] = $product->primary_image_url;
+                        if ($product->primary_image) {
+                            $images[] = $product->primary_image;
                         }
+                        // Pastikan additional_images adalah array sebelum digabungkan
+                        $additional = is_array($product->additional_images) ? $product->additional_images : json_decode($product->additional_images, true) ?? [];
+
                         $images = array_merge($images, $additional);
-                        // ensure 5 slots
                         $images = array_pad($images, 5, null);
                     @endphp
 
                     @foreach($images as $i => $img)
-                    <div class="bg-gray-200 rounded-lg cursor-pointer border-2 {{ $i == 0 ? 'border-koma-primary' : 'border-transparent' }} hover:border-koma-primary transition duration-150">
+                    @php
+                        $imgUrl = $img ? Storage::url($img) : asset('storage/placeholder/default.png');
+                    @endphp
+                    <div @click="mainImage = '{{ $imgUrl }}'"
+                         class="bg-gray-200 rounded-lg cursor-pointer border-2 hover:border-koma-primary transition duration-150"
+                         :class="mainImage === '{{ $imgUrl }}' ? 'border-koma-primary' : 'border-transparent'">
                         @if($img)
-                        <div class="aspect-square rounded bg-cover bg-center" style="background-image: url('{{ $img }}')"></div>
+                        {{-- KOREKSI 2: Menggunakan imgUrl yang sudah di-generate Storage::url --}}
+                        <div class="aspect-square rounded bg-cover bg-center" style="background-image: url('{{ $imgUrl }}')"></div>
                         @else
                         <div class="aspect-square rounded bg-center flex items-center justify-center text-gray-400">
                             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
@@ -98,7 +105,7 @@
                                     <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">SKU</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->sku }}</dd></div>
                                     <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">Brand</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->brand ?? '-' }}</dd></div>
                                     <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">Kategori</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->category->name ?? '-' }}</dd></div>
-                                    <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">Kondisi</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->condition_label }}</dd></div>
+                                    <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">Kondisi</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->condition_label ?? $product->condition }}</dd></div>
                                     <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">Berat</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->weight ? $product->weight.' gram' : '-' }}</dd></div>
                                     <div class="flex flex-col"><dt class="text-sm font-medium text-gray-500">Garansi</dt><dd class="mt-1 text-sm text-gray-900">{{ $product->warranty ? $product->warranty.' bulan' : 'Tidak ada' }}</dd></div>
                                 </dl>
@@ -142,7 +149,8 @@
                     </div>
                     <div class="flex items-center justify-between">
                         <p class="text-sm text-gray-600">Terjual</p>
-                        <p class="text-sm font-bold text-gray-800">{{ $product->reviews_count ?? 0 }} unit</p>
+                        {{-- Menggunakan reviews_count (asumsi ini dihitung dari pesanan) --}}
+                        <p class="text-sm font-bold text-gray-800">{{ $product->reviews_count ?? 0 }} unit</p> 
                     </div>
                     <div class="flex items-center justify-between">
                         <p class="text-sm text-gray-600">Minimum Stok</p>
@@ -155,10 +163,12 @@
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="font-semibold text-gray-800 mb-4 border-b pb-3">Rating Produk</h3>
                 <div class="flex items-center justify-center space-x-2 mb-2">
-                    <p class="text-3xl font-bold text-gray-800">{{ number_format($product->averageRating(), 1) }}</p>
+                    {{-- KOREKSI 3: Menggunakan rating_average dari kolom DB --}}
+                    <p class="text-3xl font-bold text-gray-800">{{ number_format($product->rating_average, 1) }}</p>
                     <div class="flex">
+                        @php $avgRating = $product->rating_average ?? 0; @endphp
                         @for($i = 1; $i <= 5; $i++)
-                        <svg class="w-5 h-5 {{ $i <= floor($product->averageRating()) ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                        <svg class="w-5 h-5 {{ $i <= floor($avgRating) ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
                         @endfor
                     </div>
                 </div>
@@ -171,12 +181,18 @@
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-600">Publikasi</span>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Aktif</span>
+                        {{-- Asumsi is_active adalah boolean di model --}}
+                        @if($product->is_active)
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Aktif</span>
+                        @else
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Nonaktif</span>
+                        @endif
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-gray-600">Terakhir Diperbarui</span>
                         <span class="text-sm text-gray-600">{{ $product->updated_at->diffForHumans() }}</span>
                     </div>
+                    {{-- Form Hapus Produk --}}
                     <form action="{{ route('seller.products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Hapus produk ini secara permanen? Tindakan ini tidak dapat dibatalkan.');">
                         @csrf
                         @method('DELETE')
@@ -192,6 +208,7 @@
     </div>
 
 </div>
+
 @endsection
 
 @push('scripts')

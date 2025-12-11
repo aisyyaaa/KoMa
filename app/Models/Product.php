@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Casts\Attribute; // Tambahkan ini untuk Accessor baru
+use Illuminate\Database\Eloquent\Casts\Attribute; 
 
 class Product extends Model
 {
@@ -21,7 +21,10 @@ class Product extends Model
         'sku', 'brand', 'condition', 'warranty',
         'weight', 'length', 'width',
         'primary_image',
-        'additional_images'
+        'additional_images',
+        // Tambahkan rating_average dan is_active jika Anda menggunakannya di seeder/Controller
+        'rating_average', 
+        'is_active'
     ];
 
     protected $casts = [
@@ -36,8 +39,9 @@ class Product extends Model
         'min_stock' => 'integer',
     ];
     
-    // Tambahkan accessor URL gambar utama ke Appends agar selalu tersedia di Collection/JSON
-    protected $appends = ['primary_image_url', 'average_rating'];
+    // Tambahkan accessor URL gambar utama ke Appends
+    // 'average_rating' tidak perlu di appends karena kita menggunakan rating_average dari DB
+    protected $appends = ['primary_image_url', 'condition_label']; 
 
     // --- RELATIONS ---
 
@@ -60,7 +64,6 @@ class Product extends Model
 
     /**
      * ACCESSOR untuk mendapatkan URL gambar utama.
-     * Menggunakan Laravel 9/10/11 Attribute untuk sintaks modern.
      */
     protected function primaryImageUrl(): Attribute
     {
@@ -69,26 +72,25 @@ class Product extends Model
                 $imagePath = $attributes['primary_image'];
                 
                 if (empty($imagePath)) {
-                    // Fallback ke aset default jika gambar tidak ada
+                    // Fallback ke aset default
+                    // Ganti 'images/default_product.png' dengan path default Anda
                     return asset('images/default_product.png'); 
                 }
 
+                // Cek jika path sudah berupa URL lengkap
                 if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
                     return $imagePath;
                 }
 
-                try {
-                    return Storage::url($imagePath);
-                } catch (\Throwable $e) {
-                    return asset('storage/' . ltrim($imagePath, '/'));
-                }
+                // KOREKSI KRITIS: Hapus blok try-catch yang menyebabkan path ganda
+                // Storage::url() sudah menangani symbolic link
+                return Storage::url($imagePath);
             },
         );
     }
 
     /**
-     * ACCESSOR untuk mendapatkan array URL gambar tambahan.
-     * Tidak diubah dari kode Anda, hanya menggunakan sintaks fungsi.
+     * Accessor untuk mendapatkan array URL gambar tambahan.
      */
     public function getAdditionalImageUrlsAttribute()
     {
@@ -107,27 +109,12 @@ class Product extends Model
                 continue;
             }
             
-            try {
-                $urls[] = Storage::url($img);
-            } catch (\Throwable $e) {
-                $urls[] = asset('storage/' . ltrim($img, '/'));
-            }
+            $urls[] = Storage::url($img);
         }
 
         return $urls;
     }
 
-
-    /**
-     * ACCESSOR/HELPER untuk mendapatkan rata-rata rating (diakses sebagai $product->average_rating).
-     * Penting untuk digunakan di View dan untuk mencegah error di Controller saat mengurutkan.
-     */
-    protected function averageRating(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->reviews()->avg('rating') ?? 0,
-        );
-    }
 
     /**
      * Accessor untuk mendapatkan label kondisi yang lebih mudah dibaca.
@@ -140,4 +127,7 @@ class Product extends Model
             default => ucfirst($this->condition ?? ''),
         };
     }
+    
+    // Hapus Accessor averageRating() yang lambat.
+    // Gunakan rating_average (kolom DB) atau reviews_avg_rating (dari withAvg) di Controller.
 }
