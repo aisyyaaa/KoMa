@@ -44,15 +44,6 @@
         </div>
 
         <div class="space-y-3">
-            <form action="{{ route('seller.auth.verify.resend') }}" method="POST">
-                @csrf
-                <button 
-                    type="submit"
-                    class="w-full py-3 px-4 border border-koma-primary text-koma-primary font-semibold rounded-lg 
-                           hover:bg-koma-bg-light transition duration-200">
-                    Kirim Ulang Email Verifikasi
-                </button>
-            </form>
 
             <a href="{{ route('katalog.index') }}" 
                class="block w-full py-3 px-4 bg-koma-primary text-white font-semibold rounded-lg 
