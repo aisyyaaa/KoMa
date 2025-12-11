@@ -14,6 +14,7 @@ class Seller extends Authenticatable
      * Kolom yang diizinkan untuk diisi secara massal (Mass Assignable).
      */
     protected $fillable = [
+<<<<<<< Updated upstream
         // Data Toko & PIC
         'store_name', 
         'store_description', // Pastikan koma di sini
@@ -38,6 +39,12 @@ class Seller extends Authenticatable
         // Status & Akun
         'status', 
         'password', // Baris ini tidak perlu koma (kecuali ada elemen lain setelahnya)
+=======
+        'store_name', 'store_description',
+        'pic_name', 'pic_email', 'pic_phone', 'pic_ktp_number',
+        'pic_street', 'pic_rt', 'pic_rw', 'pic_village', 'pic_district', 'pic_city', 'pic_province',
+        'status', 'password', 'pic_photo_path', 'pic_ktp_file_path'
+>>>>>>> Stashed changes
     ];
 
     /**

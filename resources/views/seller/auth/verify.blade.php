@@ -54,10 +54,10 @@
                 </button>
             </form>
 
-            <a href="{{ route('katalog.index') }}" 
+            <a href="{{ route('landingpage.index') }}" 
                class="block w-full py-3 px-4 bg-koma-primary text-white font-semibold rounded-lg 
                       text-center shadow-md hover:bg-koma-danger transition duration-200">
-                Kembali ke Katalog
+                Kembali ke Halaman Beranda
             </a>
         </div>
 

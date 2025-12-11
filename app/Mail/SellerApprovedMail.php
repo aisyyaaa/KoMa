@@ -20,8 +20,13 @@ class SellerApprovedMail extends Mailable
 
     public function build()
     {
+        $verificationUrl = url('/seller/registration/verified');
+
         return $this->subject('Verifikasi Penjual Diterima')
                     ->view('emails.seller_approved')
-                    ->with(['seller' => $this->seller]);
+                    ->with([
+                        'seller' => $this->seller,
+                        'verificationUrl' => $verificationUrl,
+                    ]);
     }
 }

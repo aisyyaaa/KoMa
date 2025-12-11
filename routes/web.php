@@ -48,9 +48,26 @@ Route::post('/katalog/{product}/review', [ReviewController::class, 'store'])->na
 Route::get('/register/seller', [SellerAuthController::class, 'showRegister'])->name('seller.register');
 Route::post('/register/seller', [SellerAuthController::class, 'register'])->name('seller.store');
 
+<<<<<<< Updated upstream
 // 4. Registrasi Pembeli (Baru dari Incoming)
 Route::get('buyer/register', [AuthController::class, 'showBuyerRegister'])->name('buyer.register');
 Route::post('buyer/register', [AuthController::class, 'registerBuyer'])->name('buyer.register.post');
+=======
+// Registration result pages for sellers
+Route::get('/seller/registration/pending', function () {
+    return view('seller.auth.registration_pending');
+})->name('seller.register.pending');
+
+Route::get('/seller/registration/verified', function () {
+    return view('seller.auth.registration_verified');
+})->name('seller.register.verified');
+
+/*
+|--------------------------------------------------------------------------
+| Seller Area (Auth + Dashboard + Products + Reports)
+|--------------------------------------------------------------------------
+*/
+>>>>>>> Stashed changes
 
 // 5. Global Login/Logout (Pilihan akun)
 Route::get('login', [AuthController::class, 'showLoginSelection'])->name('login');
