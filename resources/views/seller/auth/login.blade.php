@@ -44,6 +44,12 @@
                     <p class="text-gray-600 text-xs mt-1">Kelola akun Anda sekarang</p>
                 </div>
 
+                @if (session('status'))
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-3 py-2 rounded-lg mb-4 text-sm" role="alert">
+                        <p class="text-xs">{{ session('status') }}</p>
+                    </div>
+                @endif
+
                 @if ($errors->any())
                     <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-lg mb-4 text-sm" role="alert">
                         <strong class="font-bold">Login Gagal</strong>
@@ -125,29 +131,11 @@
                     </button>
                 </form>
 
-                <div class="relative mb-3">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-xs">
-                        <span class="px-2 bg-white text-gray-500">Atau</span>
-                    </div>
-                </div>
-
                 <div class="text-center mb-4">
-                    <p class="text-gray-600 text-xs mb-2">
-                        Belum punya akun? Pilih pendaftaran:
-                    </p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <a href="{{ route('buyer.register') }}" 
-                           class="inline-block w-full text-center py-2.5 px-4 bg-koma-accent text-white text-sm font-semibold rounded-lg hover:opacity-95 transition duration-200">
-                            Daftar sebagai Pengguna
-                        </a>
-                        <a href="{{ route('seller.auth.register') }}" 
-                           class="inline-block w-full text-center py-2.5 px-4 border-2 border-koma-primary text-koma-primary text-sm font-semibold rounded-lg hover:bg-koma-bg-light transition duration-200">
-                            Daftar sebagai Penjual
-                        </a>
-                    </div>
+                    <a href="{{ route('seller.auth.register') }}" 
+                       class="inline-block w-full text-center py-2.5 px-4 border-2 border-koma-primary text-koma-primary text-sm font-semibold rounded-lg hover:bg-koma-bg-light transition duration-200">
+                        Daftar sebagai Penjual
+                    </a>
                 </div>
 
                 <div class="pt-4 border-t border-gray-200">

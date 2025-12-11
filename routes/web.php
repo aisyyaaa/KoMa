@@ -7,7 +7,6 @@ use App\Http\Controllers\LandingPageController; // <-- Ditambahkan dari Incoming
 use App\Http\Controllers\Seller\Auth\SellerAuthController;
 use App\Http\Controllers\Seller\Auth\SellerVerificationController as SellerVerify;
 use App\Http\Controllers\Seller\SellerDashboardController;
-use App\Http\Controllers\Seller\SellerOrderController;
 use App\Http\Controllers\Seller\SellerProductController;
 use App\Http\Controllers\Seller\SellerReportController;
 use App\Http\Controllers\Seller\SellerReviewController;
@@ -79,10 +78,6 @@ Route::get('seller/verify', [SellerVerify::class, 'show'])->name('seller.auth.ve
 Route::post('seller/verify', [SellerVerify::class, 'verify'])->name('seller.auth.verify.post');
 Route::post('seller/verify/resend', [SellerVerify::class, 'resend'])->name('seller.auth.verify.resend');
 
-// TEMPORARY: Public access for DEV (Dashboard, Products, Reports)
-Route::get(uri: 'seller/dashboard', action: [SellerDashboardController::class, 'index'])->name('seller.dashboard');
-Route::get('seller/orders', [SellerOrderController::class, 'index'])->name('seller.orders.index');
-Route::post('seller/orders/{order}/status', [SellerOrderController::class, 'update'])->name('seller.orders.update');
 
 
 // Seller Reports (Public for DEV, as in your current code)

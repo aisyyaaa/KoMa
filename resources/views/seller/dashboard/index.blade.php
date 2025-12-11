@@ -62,11 +62,6 @@
         <div x-data="dashboard()" x-init="initSummary()" class="mb-6">
             <div class="border-b border-gray-200">
                 <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-                    <button @click="activeTab = 'ringkasan'" 
-                            :class="activeTab === 'ringkasan' ? 'border-koma-primary text-koma-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                            class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors">
-                        Ringkasan
-                    </button>
                     <button @click="activeTab = 'produk'; initProductCharts()"
                             :class="activeTab === 'produk' ? 'border-koma-primary text-koma-primary' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                             class="whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors">
@@ -82,32 +77,6 @@
 
             {{-- TAB PANELS --}}
             <div class="py-6">
-                {{-- Ringkasan Panel --}}
-                <div x-show="activeTab === 'ringkasan'" x-transition>
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Tren Penjualan (7 Hari Terakhir)</h3>
-                            <div class="relative h-80"><canvas id="salesTrendChart"></canvas></div>
-                        </div>
-                        <div class="bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Status Pesanan</h3>
-                            <div class="relative h-80"><canvas id="orderStatusChart"></canvas></div>
-                        </div>
-                    </div>
-                </div>
-                {{-- Analisis Produk Panel --}}
-                <div x-show="activeTab === 'produk'" x-transition>
-                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
-                        <div class="lg:col-span-3 bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Stok per Produk</h3>
-                            <div class="relative h-96"><canvas id="stockPerProductChart"></canvas></div>
-                        </div>
-                        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Rating per Produk</h3>
-                            <div class="relative h-96"><canvas id="productRatingsChart"></canvas></div>
-                        </div>
-                    </div>
-                </div>
                 {{-- Analisis Pelanggan Panel --}}
                 <div x-show="activeTab === 'pelanggan'" x-transition>
                     <div class="grid grid-cols-1">
@@ -127,20 +96,10 @@
 <script>
     function dashboard() {
         return {
-            activeTab: 'ringkasan',
+            activeTab: 'produk',
             charts: {},
 
-            initSummary() {
-                this.initChart('salesTrendChart', 'line', {
-                    labels: ['6 hari lalu','5 hari lalu','4 hari lalu','3 hari lalu','2 hari lalu','Kemarin','Hari ini'],
-                    datasets: [{ label: 'Penjualan', data: [5,8,6,10,9,12,7], backgroundColor: 'rgba(59,130,246,0.2)', borderColor: 'rgba(59,130,246,1)', fill: true }]
-                }, { responsive: true, maintainAspectRatio: false });
-
-                this.initChart('orderStatusChart', 'doughnut', {
-                    labels: ['Pending','Dikemas','Dikirim','Selesai'],
-                    datasets: [{ data: [8,4,12,20], backgroundColor: ['#F59E0B','#3B82F6','#10B981','#6B7280'] }]
-                }, { responsive: true, maintainAspectRatio: false });
-            },
+            
 
             initProductCharts() {
                 this.fetchAndCreateChart("{{ route('seller.api.charts.stock_per_product') }}", 'stockPerProductChart', 'bar', 'Stok', 'rgba(16,185,129,0.6)');

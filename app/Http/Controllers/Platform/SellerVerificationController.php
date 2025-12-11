@@ -24,8 +24,8 @@ class SellerVerificationController extends Controller
 
     public function index()
     {
-        $pending = Seller::where('status', 'PENDING')->orderBy('created_at', 'desc')->get();
-        return view('platform.verifications.index', compact('pending'));
+        $sellers = Seller::orderBy('created_at', 'desc')->get();
+        return view('platform.verifications.index', compact('sellers'));
     }
 
     public function show(Seller $seller)
@@ -63,5 +63,32 @@ class SellerVerificationController extends Controller
             Log::error('Seller rejection error: '.$e->getMessage());
             return back()->with('error', 'Gagal menolak penjual.');
         }
+    }
+    public function updateStatus(Request $request, Seller $seller)
+    {
+        $data = $request->validate([
+            'status' => 'required|in:PENDING,ACTIVE,REJECTED',
+        ]);
+
+        $seller->status = $data['status'];
+        $seller->save();
+
+        if ($seller->status === 'REJECTED') {
+            Mail::to($seller->pic_email)->send(new SellerRejectedMail($seller, 'Mohon lengkapi kembali data anda.'));
+            return back()->with('success', 'Status diperbarui dan email penolakan dikirim.');
+        }
+
+        return back()->with('success', 'Status penjual berhasil diperbarui.');
+    }
+
+    public function sendActivationEmail(Seller $seller)
+    {
+        if ($seller->status !== 'ACTIVE') {
+            return back()->with('error', 'Status penjual belum diterima.');
+        }
+
+        Mail::to($seller->pic_email)->send(new SellerApprovedMail($seller));
+
+        return back()->with('success', 'Email aktivasi telah dikirim ke penjual.');
     }
 }
