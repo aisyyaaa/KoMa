@@ -7,7 +7,9 @@
     <div class="max-w-7xl mx-auto">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">Dashboard</h1>
 
+        {{-- STATS CARDS (SRS-08) --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            {{-- ... (Stats Cards tidak diubah) ... --}}
             {{-- Card 1: Total Products --}}
             <div class="bg-white p-5 rounded-lg shadow">
                 <div class="flex items-center">
@@ -58,8 +60,8 @@
             </div>
         </div>
 
-        {{-- TABS --}}
-        <div x-data="dashboard()" x-init="initSummary()" class="mb-6">
+        {{-- TABS (SRS-08 Charts) --}}
+        <div x-data="dashboard()" x-init="initProductCharts()" class="mb-6">
             <div class="border-b border-gray-200">
                 <nav class="-mb-px flex space-x-6" aria-label="Tabs">
                     <button @click="activeTab = 'produk'; initProductCharts()"
@@ -77,15 +79,36 @@
 
             {{-- TAB PANELS --}}
             <div class="py-6">
-                {{-- Analisis Pelanggan Panel --}}
-                <div x-show="activeTab === 'pelanggan'" x-transition>
-                    <div class="grid grid-cols-1">
+                
+                {{-- Analisis Produk Panel (Stok dan Rating Per Produk) --}}
+                <div x-show="activeTab === 'produk'" x-transition>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {{-- Grafik 1: Stok per Produk --}}
                         <div class="bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Sebaran Lokasi Rating</h3>
-                            <div class="relative h-96"><canvas id="raterLocationChart"></canvas></div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Sebaran Jumlah Stok per Produk</h3>
+                            <div class="relative h-96"><canvas id="stockPerProductChart"></canvas></div>
+                        </div>
+                        
+                        {{-- Grafik 2: Rating per Produk --}}
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Sebaran Nilai Rating per Produk</h3>
+                            <div class="relative h-96"><canvas id="productRatingsChart"></canvas></div>
                         </div>
                     </div>
                 </div>
+
+                {{-- Analisis Pelanggan Panel (Lokasi Rating) --}}
+                <div x-show="activeTab === 'pelanggan'" x-transition>
+                    <div class="grid grid-cols-1">
+                        {{-- Grafik 3: Sebaran Pemberi Rating berdasarkan Lokasi Propinsi --}}
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Sebaran Pemberi Rating berdasarkan Lokasi Propinsi</h3>
+                            {{-- PERBAIKAN: Tambahkan x-init untuk me-render ulang chart saat tab aktif --}}
+                            <div x-init="if (activeTab === 'pelanggan') initCustomerCharts()" class="relative h-96"><canvas id="raterLocationChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </div>
@@ -94,20 +117,35 @@
 
 @push('scripts')
 <script>
+    // Asumsi library Axios tersedia secara global
     function dashboard() {
+        // Mendapatkan URL dari Controller (yang kita definisikan di SellerDashboardController)
+        const chartUrls = {
+            stock: "{{ route('seller.api.charts.stock_per_product') }}",
+            rating: "{{ route('seller.api.charts.rating_per_product') }}",
+            province: "{{ route('seller.api.charts.rating_by_province') }}",
+        };
+        
         return {
             activeTab: 'produk',
             charts: {},
 
-            
-
+            // Dipanggil saat x-init. Memuat chart default (Analisis Produk).
             initProductCharts() {
-                this.fetchAndCreateChart("{{ route('seller.api.charts.stock_per_product') }}", 'stockPerProductChart', 'bar', 'Stok', 'rgba(16,185,129,0.6)');
-                this.fetchAndCreateChart("{{ route('seller.api.charts.rating_per_product') }}", 'productRatingsChart', 'bar', 'Rating', 'rgba(248,113,113,0.6)', { y: { beginAtZero: true, max: 5 } });
+                // Grafik Stok per Produk (Bar Chart)
+                this.fetchAndCreateChart(chartUrls.stock, 'stockPerProductChart', 'bar', 'Stok', 'rgba(16,185,129,0.6)');
+                
+                // Grafik Rating per Produk (Bar Chart, Max Y=5)
+                this.fetchAndCreateChart(chartUrls.rating, 'productRatingsChart', 'bar', 'Rating', 'rgba(248,113,113,0.6)', { y: { beginAtZero: true, max: 5 } });
             },
 
+            // Fungsi ini dipanggil secara manual dari button tab dan x-init di div pelanggan
             initCustomerCharts() {
-                this.fetchAndCreateChart("{{ route('seller.api.charts.rating_by_province') }}", 'raterLocationChart', 'bar', 'Rating', 'rgba(99,102,241,0.6)');
+                // Tambahkan timeout untuk memastikan DOM dirender sebelum chart digambar
+                setTimeout(() => {
+                    // Grafik Pemberi Rating berdasarkan Provinsi
+                    this.fetchAndCreateChart(chartUrls.province, 'raterLocationChart', 'bar', 'Jumlah Rating', 'rgba(99,102,241,0.6)');
+                }, 100); 
             },
 
             initChart(canvasId, type, data, options) {
@@ -124,7 +162,8 @@
             fetchAndCreateChart(url, canvasId, type, label, color, scales) {
                 axios.get(url)
                     .then(res => {
-                        if (res.data) {
+                        // Cek apakah data tidak kosong. Jika kosong, biarkan kosong.
+                        if (res.data && res.data.labels && res.data.labels.length > 0) {
                             const data = {
                                 labels: res.data.labels,
                                 datasets: [{
@@ -138,8 +177,21 @@
                                 maintainAspectRatio: false,
                                 scales: scales || {}
                             });
+                        } else {
+                            // Tampilkan pesan di console jika data kosong
+                            console.warn(`Chart data is empty for ${canvasId}. Check database seeder for 'users.province'.`);
+                            // Hancurkan chart lama jika ada, agar canvas bersih
+                            if (this.charts[canvasId]) {
+                                this.charts[canvasId].destroy();
+                                delete this.charts[canvasId];
+                            }
                         }
-                    }).catch(err => console.error(`Error fetching data for ${canvasId}:`, err));
+                    }).catch(err => {
+                        console.error(`Error fetching data for ${canvasId} from ${url}:`, err);
+                        if (err.response && (err.response.status === 401 || err.response.status === 403)) {
+                            console.error("Authentication/Authorization failed for chart API. Check Seller API routes.");
+                        }
+                    });
             }
         }
     }

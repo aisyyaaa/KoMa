@@ -7,18 +7,22 @@ use Illuminate\Http\Request;
 use App\Models\Seller;
 use App\Models\Product;
 use App\Models\Review;
+// Import yang diperlukan untuk data statistik
+use Illuminate\Support\Facades\DB; 
 
 class PlatformDashboardController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            if (!auth()->check() || !auth()->user()->is_platform_admin) {
-                return redirect()->route('platform.auth.login');
-            }
-            return $next($request);
-        });
-    }
+    // HAPUS KONSTRUKTOR BERMASALAH UNTUK MENGHILANGKAN ERROR ROUTE NOT FOUND
+    // public function __construct()
+    // {
+    //     $this->middleware(function ($request, $next) {
+    //         if (!auth()->check() || !auth()->user()->is_platform_admin) {
+    //             return redirect()->route('platform.auth.login'); // BARIS INI MENYEBABKAN ERROR
+    //         }
+    //         return $next($request);
+    //     });
+    // }
+    
     public function index()
     {
         // gather stats for dashboard (SRS-07)

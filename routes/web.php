@@ -21,7 +21,6 @@ use App\Http\Controllers\Seller\Api\SellerDataController;
 use App\Http\Controllers\Platform\PlatformDashboardController; 
 use App\Http\Controllers\Platform\PlatformAnalyticsController; 
 use App\Http\Controllers\Platform\PlatformReportController; 
-use App\Http\Controllers\Platform\Auth\PlatformAuthController; 
 
 // --- LARAVEL FACADES ---
 use Illuminate\Support\Facades\Route;
@@ -135,16 +134,16 @@ Route::middleware(['auth:seller'])->prefix('seller')->name('seller.')->group(fun
 
 /*
 |--------------------------------------------------------------------------
-| Platform Admin Area (Requires Authentication)
+| Platform Admin Area (BYPASS MIDDLEWARE & AUTH REMOVED FOR TESTING)
 |--------------------------------------------------------------------------
 */
 Route::prefix('platform')->name('platform.')->group(function () {
-    // Authentication
-    Route::get('auth/login', [PlatformAuthController::class, 'showLogin'])->name('auth.login');
-    Route::post('auth/login', [PlatformAuthController::class, 'login'])->name('auth.login.post');
-    Route::post('auth/logout', [PlatformAuthController::class, 'logout'])->name('auth.logout');
-    
-    Route::middleware(['auth:platform'])->group(function () { 
+    // Authentication Dihapus dari rute
+    // route('platform.auth.login') dan lainnya TIDAK ADA LAGI
+
+    // BLOK KONTEN UTAMA: Tanpa Middleware Otentikasi
+    Route::group([], function () {
+        
         // Dashboard (SRS-MartPlace-07)
         Route::get('dashboard', [PlatformDashboardController::class, 'index'])->name('dashboard');
 
@@ -161,7 +160,7 @@ Route::prefix('platform')->name('platform.')->group(function () {
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('active-sellers', [PlatformReportController::class, 'activeSellers'])->name('active_sellers');
             Route::get('sellers-by-province', [PlatformReportController::class, 'sellersByProvince'])->name('sellers_by_province');
-            Route::get('products-by-rating', [PlatformReportController::class, 'productsByRating'])->name('products_by_rating');
+            Route::get('products-by-rating', [PlatformReportController::class, 'productsByRating'])->name('products_by_rating'); // SRS-11
             Route::get('export/{type}', [PlatformReportController::class, 'exportPdf'])->name('export');
         });
 

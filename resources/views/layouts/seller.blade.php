@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Seller Panel') - KoMa Market</title>
+    
+    {{-- BARIS WAJIB DITAMBAH: CSRF TOKEN UNTUK AJAX (MENGATASI PAGE EXPIRED/REDIRECT) --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    {{-- AKHIR BARIS WAJIB DITAMBAH --}}
+
     @vite('resources/css/app.css')
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -32,8 +37,8 @@
                 {{-- Dashboard --}}
                 <a href="{{ route('seller.dashboard') }}" 
                    class="flex items-center px-4 py-2.5 rounded-lg text-sm font-medium 
-                          {{ request()->routeIs('seller.dashboard') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-100' }} 
-                          transition duration-200">
+                           {{ request()->routeIs('seller.dashboard') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-100' }} 
+                           transition duration-200">
                     <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 11l4-4m0 0l4 4m-4-4v4"></path>
                     </svg>
@@ -43,15 +48,13 @@
                 {{-- Produk --}}
                 <a href="{{ route('seller.products.index') }}" 
                    class="flex items-center px-4 py-2.5 rounded-lg text-sm font-medium 
-                          {{ request()->routeIs('seller.products.*') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}
-                          transition duration-150">
+                           {{ request()->routeIs('seller.products.*') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}
+                           transition duration-150">
                     <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m0 0l8 4m-8-4v10l8 4m0-10l8 4m-8-4v10M7 12l5 2.5m5-2.5L12 17"></path>
                     </svg>
                     Produk
                 </a>
-
-    
 
                 {{-- Laporan --}}
                 <div x-data="{ open: {{ request()->routeIs('seller.reports.*') ? 'true' : 'false' }} }">
@@ -98,6 +101,7 @@
                         </svg>
                         Logout
                     </button>
+                </form>
             </div>
 
         </div>
@@ -156,6 +160,19 @@
         </div>
     </div>
     
+    {{-- BARIS WAJIB DITAMBAH: INISIALISASI AXIOS DENGAN CSRF --}}
+    <script>
+        // Konfigurasi ini memastikan Axios (yang digunakan oleh chart JS Anda)
+        // selalu mengirimkan CSRF token yang diambil dari meta tag.
+        window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+        let token = document.head.querySelector('meta[name="csrf-token"]');
+
+        if (token) {
+            window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+        } 
+    </script>
+    {{-- AKHIR BARIS WAJIB DITAMBAH --}}
+
     @stack('scripts')
     @if(session('success'))
     <script>

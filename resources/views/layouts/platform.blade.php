@@ -29,8 +29,8 @@
                 {{-- Dashboard --}}
                 <a href="{{ route('platform.dashboard') }}" 
                    class="flex items-center px-4 py-2.5 rounded-lg text-sm font-medium 
-                          {{ request()->routeIs('platform.dashboard') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-100' }} 
-                          transition duration-200">
+                           {{ request()->routeIs('platform.dashboard') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-100' }} 
+                           transition duration-200">
                     <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-3m0 0l7-4 7 4M5 9v10a1 1 0 001 1h12a1 1 0 001-1V9m-9 11l4-4m0 0l4 4m-4-4v4"></path>
                     </svg>
@@ -38,10 +38,10 @@
                 </a>
 
                 {{-- Laporan (dropdown) --}}
-                <div x-data="{ open: {{ (request()->routeIs('platform.reports.*') || request()->routeIs('platform.verifications.*')) ? 'true' : 'false' }} }" class="">
+                <div x-data="{ open: {{ (request()->routeIs('platform.reports.*') || request()->routeIs('platform.verifications.*')) ? 'true' : 'false' }} }" x-cloak>
                     <button @click="open = !open" class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium 
-                          {{ request()->routeIs('platform.reports.*') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-100' }} 
-                          transition duration-150">
+                              {{ request()->routeIs('platform.reports.*') || request()->routeIs('platform.verifications.*') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-100' }} 
+                              transition duration-150">
                         <span class="flex items-center">
                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -56,22 +56,22 @@
                     <div x-show="open" x-collapse class="mt-2 space-y-1 px-1">
                         <a href="{{ route('platform.reports.active_sellers') }}" 
                            class="group flex items-center px-4 py-2 rounded-md text-sm font-medium w-full 
-                                {{ request()->routeIs('platform.reports.active_sellers') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
+                                 {{ request()->routeIs('platform.reports.active_sellers') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
                             Laporan Penjual Aktif
                         </a>
                         <a href="{{ route('platform.reports.sellers_by_province') }}" 
                            class="group flex items-center px-4 py-2 rounded-md text-sm font-medium w-full 
-                                {{ request()->routeIs('platform.reports.sellers_by_province') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
+                                 {{ request()->routeIs('platform.reports.sellers_by_province') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
                             Laporan Penjual Lokasi
                         </a>
                         <a href="{{ route('platform.reports.products_by_rating') }}" 
                            class="group flex items-center px-4 py-2 rounded-md text-sm font-medium w-full 
-                                {{ request()->routeIs('platform.reports.products_by_rating') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
+                                 {{ request()->routeIs('platform.reports.products_by_rating') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
                             Laporan Daftar Produk
                         </a>
                         <a href="{{ route('platform.verifications.sellers.index') }}"
                            class="group flex items-center px-4 py-2 rounded-md text-sm font-medium w-full 
-                                {{ request()->routeIs('platform.verifications.*') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
+                                 {{ request()->routeIs('platform.verifications.*') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-50' }}">
                             Verifikasi Penjual
                         </a>
                     </div>
@@ -83,28 +83,15 @@
 
             {{-- LOGOUT BUTTON --}}
             <div class="px-3 py-3 border-t border-gray-200">
-                @if(auth()->check())
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" 
-                            class="w-full flex items-center px-4 py-2.5 rounded-lg text-sm font-medium text-red-600
-                                   hover:bg-red-50 transition duration-150">
-                        <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                        </svg>
-                        Logout
-                    </button>
-                </form>
-                @else
-                <a href="{{ route('platform.auth.login') }}" 
-                   class="w-full flex items-center px-4 py-2.5 rounded-lg text-sm font-medium text-koma-primary
-                          hover:bg-gray-100 transition duration-150">
+                {{-- Karena login dinonaktifkan, kita hanya menampilkan link kembali ke katalog --}}
+                <a href="{{ route('katalog.index') }}" 
+                   class="w-full flex items-center px-4 py-2.5 rounded-lg text-sm font-medium text-red-600
+                          hover:bg-red-50 transition duration-150">
                     <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3v-1"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                     </svg>
-                    Login
+                    Kembali ke Katalog
                 </a>
-                @endif
             </div>
 
         </div>
@@ -132,11 +119,12 @@
                         
                         {{-- ADMIN NAME --}}
                         <div class="text-right">
+                            {{-- Karena login dibypass, kita tampilkan status sebagai "Guest" atau "Admin" --}}
                             @if(auth()->check())
-                            <p class="text-xs font-semibold text-gray-900">{{ auth()->user()->name }}</p>
+                            <p class="text-xs font-semibold text-gray-900">{{ auth()->user()->name ?? 'Guest Admin' }}</p>
                             <p class="text-xs text-gray-500">Platform Admin</p>
                             @else
-                            <p class="text-xs font-semibold text-gray-900">Platform</p>
+                            <p class="text-xs font-semibold text-gray-900">Guest</p>
                             <p class="text-xs text-gray-500">Admin Panel</p>
                             @endif
                         </div>
@@ -144,7 +132,7 @@
                         {{-- PROFILE AVATAR --}}
                         <div class="w-7 h-7 rounded-full bg-koma-primary text-white flex items-center justify-center text-xs font-semibold">
                             @if(auth()->check())
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            {{ strtoupper(substr(auth()->user()->name ?? 'P', 0, 1)) }}
                             @else
                             P
                             @endif
