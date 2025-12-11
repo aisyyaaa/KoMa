@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Http\Requests\ProductRequest;
+use Illuminate\Support\Str;
 
 class SellerProductController extends Controller
 {
@@ -66,6 +67,7 @@ class SellerProductController extends Controller
 
         // Set seller_id (untuk dev: hardcode 1, nanti ganti auth()->id())
         $validated['seller_id'] = auth()->id() ?? 1;
+        $validated['slug'] = $this->generateUniqueSlug($validated['name']);
 
         // Buat produk baru
         Product::create($validated);
@@ -108,6 +110,10 @@ class SellerProductController extends Controller
             $validated['additional_images'] = $existing;
         }
 
+        if (isset($validated['name'])) {
+            $validated['slug'] = $this->generateUniqueSlug($validated['name'], $product->id);
+        }
+
         // Update produk
         $product->update($validated);
 
@@ -120,5 +126,22 @@ class SellerProductController extends Controller
         $product->delete();
 
         return redirect()->route('seller.products.index')->with('success', 'Produk berhasil dihapus');
+    }
+
+    private function generateUniqueSlug(string $name, ?int $ignoreId = null): string
+    {
+        $base = Str::slug($name);
+        $slug = $base;
+        $counter = 1;
+
+        while (
+            Product::where('slug', $slug)
+                ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
+                ->exists()
+        ) {
+            $slug = $base . '-' . $counter++;
+        }
+
+        return $slug;
     }
 }
