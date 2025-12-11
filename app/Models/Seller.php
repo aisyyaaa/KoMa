@@ -12,32 +12,37 @@ class Seller extends Authenticatable
 
     /**
      * Kolom yang diizinkan untuk diisi secara massal (Mass Assignable).
+     * Diselaraskan dengan kolom di migrasi terbaru.
      */
     protected $fillable = [
-        // Data Toko & PIC
+        // Data Toko & Akun Login
         'store_name', 
-        'store_description', // Pastikan koma di sini
-        'pic_name', // Pastikan koma di sini
-        'pic_phone', // <-- PERIKSA BARIS SEBELUMNYA DAN BARIS INI
-        'pic_email', 
-        'pic_ktp_number',
+        'short_description', // Diselaraskan dari 'store_description'
+        'email',           // Diselaraskan dari 'pic_email'
+        'password', 
         
-        // Detail Alamat
-        'pic_street', 
-        'pic_rt', 
-        'pic_rw', 
-        'pic_village', 
-        'pic_district', 
-        'pic_city', 
-        'pic_province', 
+        // Data PIC & Kontak
+        'pic_name', 
+        'phone_number',    // Diselaraskan dari 'pic_phone'
+        'ktp_number',      // Diselaraskan dari 'pic_ktp_number'
         
-        // Dokumen
+        // Detail Alamat PIC (Termasuk Kecamatan)
+        'address',         // Diselaraskan dari 'pic_street'
+        'rt', 
+        'rw', 
+        'village', 
+        'district',        // 💡 KOLOM KECAMATAN
+        'city', 
+        'province', 
+        
+        // Dokumen PIC
         'pic_photo_path', 
-        'pic_ktp_file_path',
+        'ktp_file_path',
         
-        // Status & Akun
-        'status', 
-        'password', // Baris ini tidak perlu koma (kecuali ada elemen lain setelahnya)
+        // Status & Verifikasi (SRS-MartPlace-02)
+        'is_active',           // Status aktif akun (boolean)
+        'verification_status', // Status verifikasi (enum: pending, approved, rejected)
+        'registration_date',   // Tanggal pendaftaran
     ];
 
     /**
@@ -52,9 +57,8 @@ class Seller extends Authenticatable
      * Atribut yang harus di-cast ke tipe bawaan.
      */
     protected $casts = [
-        'pic_ktp_number' => 'string',
-        'pic_ktp_file_path' => 'string',
-        'pic_phone' => 'string',
+        'is_active' => 'boolean', // Status aktif adalah boolean
+        'registration_date' => 'datetime', // Tanggal pendaftaran adalah datetime
     ];
 
     /**

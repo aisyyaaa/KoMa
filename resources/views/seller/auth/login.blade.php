@@ -3,164 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Penjual KoMa Market</title>
-    @vite('resources/css/app.css')
+    <title>Masuk Penjual KoMa Market</title>
+    {{-- Memastikan styling Tailwind di-load --}}
+    @vite('resources/css/app.css') 
+    {{-- Kita asumsikan Anda memiliki warna kustom di tailwind.config.js, 
+         misalnya: bg-koma-accent, text-koma-primary, dll. --}}
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center px-4 py-4">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
-    <div class="w-full max-w-5xl h-screen max-h-[85vh] bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
+    {{-- Container utama: Diperbaiki agar card responsif dan tetap di tengah --}}
+    <div class="w-full max-w-5xl bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col lg:flex-row min-h-[550px] max-h-[90vh]">
         
         {{-- LEFT SIDE: Welcome Section (Blue) --}}
-        <div class="hidden lg:flex lg:w-1/2 bg-koma-accent flex-col items-center justify-center p-8 overflow-y-auto">
+        <div class="hidden lg:flex lg:w-5/12 bg-koma-accent flex-col items-center justify-center p-8">
             <div class="text-center text-white max-w-sm">
-                <div class="mb-6">
-                    <h1 class="text-5xl font-extrabold mb-3">KoMa</h1>
-                    <div class="h-1 w-20 bg-white mx-auto"></div>
+                <div class="mb-8">
+                    <h1 class="text-5xl font-extrabold mb-3 tracking-wide">KoMa</h1>
+                    <div class="h-1.5 w-20 bg-white mx-auto rounded-full"></div>
                 </div>
                 
-                <h2 class="text-2xl font-bold mb-4">Selamat Datang</h2>
+                <h2 class="text-2xl font-semibold mb-3">Selamat Datang</h2>
                 
-                <p class="text-sm leading-relaxed mb-6">
+                <p class="text-sm opacity-90 leading-relaxed mb-6">
                     Bergabunglah dengan ribuan penjual di KoMa Market dan kembangkan bisnis Anda bersama komunitas mahasiswa terpercaya.
                 </p>
 
-
-                <p class="text-xs opacity-90">
-                    Sudah jadi bagian KoMa? Masuk sekarang.
+                <p class="text-xs font-light mt-4">
+                    Pusat Jual Beli Mahasiswa
                 </p>
             </div>
         </div>
 
         {{-- RIGHT SIDE: Login Form --}}
-        <div class="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 lg:p-8 overflow-y-auto">
-            <div class="w-full max-w-sm">
-                <div class="lg:hidden text-center mb-6">
-                    <h1 class="text-3xl font-bold text-koma-primary mb-1">KoMa</h1>
-                    <h2 class="text-xl font-bold text-koma-text-dark">Login Penjual</h2>
-                </div>
+        <div class="w-full lg:w-7/12 flex flex-col items-center justify-center p-6 sm:p-10 lg:p-12 overflow-y-auto">
+            <div class="w-full max-w-md">
+                
+                {{-- Judul dan Subjudul --}}
+                <h2 class="text-3xl font-bold text-koma-text-dark mb-2 text-center lg:text-left">
+                    Masuk ke Akun Penjual
+                </h2>
+                <p class="text-gray-600 text-sm mb-8 text-center lg:text-left">
+                    Masukkan email dan kata sandi Anda untuk melanjutkan.
+                </p>
 
-                <div class="hidden lg:block mb-6">
-                    <h2 class="text-xl font-bold text-koma-text-dark">Masuk ke Akun</h2>
-                    <p class="text-gray-600 text-xs mt-1">Kelola akun Anda sekarang</p>
-                </div>
-
+                {{-- Alert Error --}}
                 @if ($errors->any())
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-lg mb-4 text-sm" role="alert">
-                        <strong class="font-bold">Login Gagal</strong>
-                        <p class="text-xs mt-1">Email atau password tidak sesuai.</p>
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm" role="alert">
+                        <strong class="font-bold block mb-1">Login Gagal</strong>
+                        <p class="text-xs">Email atau password tidak sesuai. Silakan coba lagi.</p>
                     </div>
                 @endif
 
-                <form action="{{ route('login.post') }}" method="POST">
+                <form action="{{ route('login.post') }}" method="POST" class="space-y-6">
                     @csrf
 
-                    <div class="mb-4">
-                        <label for="email" class="block text-xs font-medium text-gray-700 mb-1">
-                            Email <span class="text-koma-danger">*</span>
+                    {{-- Input Email --}}
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                            Email
                         </label>
                         <input 
                             type="email" 
                             name="email" 
                             id="email" 
                             value="{{ old('email') }}"
-                            class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 text-sm
-                                   focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                   @error('email') border-red-500 @enderror"
+                            class="w-full border rounded-xl shadow-sm p-3 text-sm transition duration-150
+                                focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent/50 
+                                {{ $errors->has('email') ? 'border-red-500' : 'border-gray-300' }}"
                             placeholder="name@example.com"
                             required>
                         @error('email')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <div class="mb-4">
-                        <label for="password" class="block text-xs font-medium text-gray-700 mb-1">
-                            Password <span class="text-koma-danger">*</span>
+                    {{-- Input Password --}}
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                            Password
                         </label>
                         <div class="relative">
                             <input 
                                 type="password" 
                                 name="password" 
                                 id="password"
-                                class="w-full border border-gray-300 rounded-lg shadow-sm p-2.5 pr-9 text-sm
-                                       focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent
-                                       @error('password') border-red-500 @enderror"
+                                class="w-full border rounded-xl shadow-sm p-3 pr-10 text-sm transition duration-150
+                                        focus:outline-none focus:border-koma-primary focus:ring-2 focus:ring-koma-accent/50 
+                                        {{ $errors->has('password') ? 'border-red-500' : 'border-gray-300' }}"
                                 placeholder="••••••••"
                                 required>
+                            {{-- Tombol Toggle Password --}}
                             <button 
                                 type="button" 
-                                class="absolute right-2.5 top-2.5 text-gray-500 hover:text-koma-primary transition"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-koma-primary transition"
                                 onclick="togglePasswordVisibility()">
-                                <svg id="eye-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                 </svg>
                             </button>
                         </div>
                         @error('password')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    <div class="flex items-center justify-between mb-4">
+                    {{-- Ingat Saya & Lupa Password --}}
+                    <div class="flex items-center justify-between pt-1">
                         <label class="flex items-center">
                             <input 
                                 type="checkbox" 
                                 name="remember" 
-                                class="w-3.5 h-3.5 border-gray-300 rounded 
-                                       text-koma-primary focus:ring-koma-accent"
+                                class="w-4 h-4 border-gray-300 rounded text-koma-primary focus:ring-koma-accent"
                                 id="remember">
-                            <span class="ml-2 text-xs text-gray-600">Ingat saya</span>
+                            <span class="ml-2 text-sm text-gray-600">Ingat saya</span>
                         </label>
-                        <a href="#" class="text-xs text-koma-primary hover:text-koma-danger transition duration-150 font-medium">
+                        <a href="#" class="text-sm text-koma-primary hover:text-koma-danger transition duration-150 font-medium">
                             Lupa password?
                         </a>
                     </div>
 
+                    {{-- Tombol Masuk --}}
                     <button 
                         type="submit" 
-                        class="w-full py-2.5 px-4 bg-koma-primary text-white text-sm font-semibold rounded-lg 
-                               shadow-md hover:bg-koma-danger transition duration-200 mb-3">
+                        class="w-full py-3 px-4 bg-koma-primary text-white text-base font-semibold rounded-xl mt-6
+                                shadow-lg shadow-koma-primary/50 hover:bg-koma-danger transition duration-200">
                         Masuk
                     </button>
                 </form>
 
-                <div class="relative mb-3">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-xs">
-                        <span class="px-2 bg-white text-gray-500">Atau</span>
-                    </div>
-                </div>
-
-                <div class="text-center mb-4">
-                    <p class="text-gray-600 text-xs mb-2">
-                        Belum punya akun? Pilih pendaftaran:
-                    </p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <a href="{{ route('buyer.register') }}" 
-                           class="inline-block w-full text-center py-2.5 px-4 bg-koma-accent text-white text-sm font-semibold rounded-lg hover:opacity-95 transition duration-200">
-                            Daftar sebagai Pengguna
+                {{-- Tautan Lain --}}
+                <div class="text-center mt-8">
+                    <p class="text-gray-600 text-sm">
+                        Belum punya akun? 
+                        <a href="{{ route('register.choice') }}" class="text-koma-primary hover:text-koma-danger font-semibold transition duration-150">
+                            Daftar Sekarang
                         </a>
-                        <a href="{{ route('seller.auth.register') }}" 
-                           class="inline-block w-full text-center py-2.5 px-4 border-2 border-koma-primary text-koma-primary text-sm font-semibold rounded-lg hover:bg-koma-bg-light transition duration-200">
-                            Daftar sebagai Penjual
+                    </p>
+                    <div class="pt-4 mt-6 border-t border-gray-200">
+                        <a href="{{ route('katalog.index') }}" class="text-sm text-koma-accent hover:text-koma-primary font-semibold transition duration-150">
+                            ← Kembali ke Halaman Beranda
                         </a>
                     </div>
                 </div>
 
-                <div class="pt-4 border-t border-gray-200">
-                    <p class="text-center text-xs text-gray-500">
-                        <a href="{{ route('landingpage.index') }}" class="text-koma-primary hover:text-koma-danger font-semibold transition duration-150">
-                            Kembali ke Halaman Beranda
-                        </a>
-                    </p>
-                </div>
             </div>
         </div>
     </div>
 
+    {{-- Script untuk Toggle Password tetap sama --}}
     <script>
         function togglePasswordVisibility() {
             const passwordInput = document.getElementById('password');
@@ -168,9 +159,13 @@
             
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
+                // Mengubah ikon menjadi mata terbuka jika perlu, dan berikan warna aktif
+                eyeIcon.setAttribute('d', 'M10 12a2 2 0 100-4 2 2 0 000 4z'); 
                 eyeIcon.classList.add('text-koma-primary');
             } else {
                 passwordInput.type = 'password';
+                // Mengubah ikon menjadi mata tertutup dan menghilangkan warna aktif
+                eyeIcon.setAttribute('d', 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z');
                 eyeIcon.classList.remove('text-koma-primary');
             }
         }
