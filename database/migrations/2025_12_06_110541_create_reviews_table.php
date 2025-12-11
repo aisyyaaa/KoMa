@@ -18,22 +18,26 @@ return new class extends Migration
             // Relasi ke Produk
             $table->foreignId('product_id')->constrained()->onDelete('cascade');
             
-            // Data Pengunjung (SRS-MartPlace-06)
+            // --- Data Pengunjung (SRS-MartPlace-06: Visitor/Guest Review) ---
+            // Kita gunakan data ini, bukan foreignId('user_id'), untuk review pengunjung
             $table->string('visitor_name', 100);
-            $table->string('visitor_phone', 20);
+            $table->string('visitor_phone', 20)->nullable(); // Nomor HP biasanya opsional
             $table->string('visitor_email')->index();
             
             // Tambahan untuk Analitik Lokasi (SRS-MartPlace-08)
             $table->string('province', 100)->nullable(); 
             
             // Komentar dan Rating (Skala 1 sampai 5)
-            $table->unsignedTinyInteger('rating'); 
+            $table->unsignedTinyInteger('rating'); // 1 sampai 5
             $table->text('comment')->nullable(); 
             
-            // KOLOM BARU DITAMBAHKAN (Untuk mengatasi error reviewed_at)
-            $table->timestamp('reviewed_at')->nullable(); 
+            // ❌ KOLOM INI DIHAPUS: created_at sudah mencatat kapan review dibuat.
+            // $table->timestamp('reviewed_at')->nullable(); 
             
-            $table->timestamps();
+            // Status Review (Opsional, untuk moderasi)
+            $table->enum('status', ['published', 'pending', 'hidden'])->default('published');
+            
+            $table->timestamps(); // Termasuk created_at (waktu review) dan updated_at
         });
     }
 

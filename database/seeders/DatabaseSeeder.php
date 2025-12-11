@@ -8,23 +8,31 @@ use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
+    use WithoutModelEvents; // Trait dipindahkan ke sini
 
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
+        // Panggil semua Seeder yang diperlukan untuk mengisi data awal
         $this->call([
+            // --- 1. SEEDER OTENTIKASI & PENGGUNA ---
+            // Urutan: Seller -> PlatformUser -> User (jika ada)
             SellerSeeder::class,
-            PlatformUserSeeder::class,
+            PlatformUserSeeder::class, 
+            
+            // Tambahkan UserSeeder di sini jika Anda membuatnya:
+            // UserSeeder::class, 
+            
+            // --- 2. SEEDER DATA KATALOG ---
+            // Urutan: Category -> Product
+            CategorySeeder::class, 
+            ProductSeeder::class, 
+            
+            // --- 3. SEEDER DATA TAMBAHAN ---
+            // Review harus di-seed setelah Produk
+            ReviewSeeder::class, // 💡 DITAMBAHKAN
         ]);
     }
 }

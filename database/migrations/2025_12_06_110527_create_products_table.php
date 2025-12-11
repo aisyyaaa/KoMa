@@ -20,7 +20,7 @@ return new class extends Migration
             
             // Data Dasar
             $table->string('name');
-            $table->string('slug')->unique(); // <-- DITAMBAHKAN: Untuk URL Detail
+            $table->string('slug')->unique(); // Untuk URL Detail
             $table->text('description');
             
             // Harga & Stok
@@ -41,9 +41,20 @@ return new class extends Migration
             $table->integer('warranty')->nullable(); 
             
             // Gambar (untuk sinkronisasi dengan Seeder)
-            // Mengganti primary_images menjadi primary_image (atau URL)
-            $table->string('primary_image')->nullable(); // <-- DITAMBAHKAN
-            $table->json('additional_images')->nullable(); // <-- DITAMBAHKAN
+            $table->string('primary_image')->nullable();
+            $table->json('additional_images')->nullable();
+            
+            // --- KOLOM KRITIS YANG DITAMBAHKAN ---
+            
+            // 💡 1. Rating Rata-rata (Perbaikan Error Seeder & SRS-MartPlace-04)
+            // Menggunakan float atau decimal untuk rating 0.0 s/d 5.0
+            $table->float('rating_average', 3, 1)->default(0.0); 
+
+            // 💡 2. Status Produk Aktif
+            // Produk harus aktif (true) agar tampil di katalog.
+            $table->boolean('is_active')->default(true); 
+            
+            // ----------------------------------------
             
             $table->timestamps();
         });
