@@ -79,7 +79,7 @@
                         </a>
                         <a href="{{ route('seller.reports.low_stock') }}"
                            class="block px-4 py-2 rounded-lg text-sm font-medium {{ request()->routeIs('seller.reports.low_stock') ? 'bg-gray-100 text-koma-primary' : 'text-gray-600 hover:bg-gray-100' }}">
-                            Stok Rendah
+                            Stok Segera Dipesan
                         </a>
                     </div>
                 </div>

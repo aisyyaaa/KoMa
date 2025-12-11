@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Casts\Attribute; // Tambahkan ini untuk Accessor baru
 
 class Product extends Model
 {
@@ -13,13 +14,13 @@ class Product extends Model
     protected $fillable = [
         'seller_id', 'category_id',
         'name', 
-        'slug', // <-- DITAMBAHKAN untuk sinkronisasi dengan migrasi/seeder
+        'slug',
         'description',
         'price', 'discount_price',
         'stock', 'min_stock',
         'sku', 'brand', 'condition', 'warranty',
         'weight', 'length', 'width',
-        'primary_image', // <-- Menggunakan 'primary_image' sesuai migrasi
+        'primary_image',
         'additional_images'
     ];
 
@@ -35,8 +36,10 @@ class Product extends Model
         'min_stock' => 'integer',
     ];
     
-    // Gunakan kolom primary_image yang sesuai dengan database
-    protected $primaryImageColumn = 'primary_image';
+    // Tambahkan accessor URL gambar utama ke Appends agar selalu tersedia di Collection/JSON
+    protected $appends = ['primary_image_url', 'average_rating'];
+
+    // --- RELATIONS ---
 
     public function seller()
     {
@@ -53,52 +56,45 @@ class Product extends Model
         return $this->hasMany(Review::class);
     }
 
+    // --- ACCESSORS / VIRTUAL ATTRIBUTES ---
+
     /**
-     * Menghitung rata-rata rating untuk produk ini.
+     * ACCESSOR untuk mendapatkan URL gambar utama.
+     * Menggunakan Laravel 9/10/11 Attribute untuk sintaks modern.
      */
-    public function averageRating()
+    protected function primaryImageUrl(): Attribute
     {
-        // Mengambil rating dari kolom 'rating' di tabel reviews
-        return $this->reviews()->avg('rating') ?? 0;
+        return Attribute::make(
+            get: function ($value, $attributes) {
+                $imagePath = $attributes['primary_image'];
+                
+                if (empty($imagePath)) {
+                    // Fallback ke aset default jika gambar tidak ada
+                    return asset('images/default_product.png'); 
+                }
+
+                if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+                    return $imagePath;
+                }
+
+                try {
+                    return Storage::url($imagePath);
+                } catch (\Throwable $e) {
+                    return asset('storage/' . ltrim($imagePath, '/'));
+                }
+            },
+        );
     }
 
     /**
-     * Accessor untuk mendapatkan URL gambar utama.
-     */
-    public function getPrimaryImageUrlAttribute()
-    {
-        $imagePath = $this->{$this->primaryImageColumn};
-        
-        // If no image stored, return null so views can fallback to default asset
-        if (empty($imagePath)) {
-            return null;
-        }
-
-        // If the stored value already looks like a full URL (seperti dari Seeder), return as-is
-        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
-            return $imagePath;
-        }
-
-        // Otherwise, assume it's a storage path and return a public URL
-        try {
-            return Storage::url($imagePath);
-        } catch (\Throwable $e) {
-            // Fallback jika Storage::url gagal
-            return asset('storage/' . ltrim($imagePath, '/'));
-        }
-    }
-
-    /**
-     * Accessor untuk mendapatkan array URL gambar tambahan.
+     * ACCESSOR untuk mendapatkan array URL gambar tambahan.
+     * Tidak diubah dari kode Anda, hanya menggunakan sintaks fungsi.
      */
     public function getAdditionalImageUrlsAttribute()
     {
         $images = $this->additional_images ?? [];
         
-        // Pastikan variabel images adalah array
         if (!is_array($images)) {
-            // Karena kita menggunakan $casts = ['additional_images' => 'array'], 
-            // ini seharusnya tidak diperlukan jika data dari DB sudah benar.
             $images = json_decode($images, true) ?: []; 
         }
 
@@ -119,6 +115,18 @@ class Product extends Model
         }
 
         return $urls;
+    }
+
+
+    /**
+     * ACCESSOR/HELPER untuk mendapatkan rata-rata rating (diakses sebagai $product->average_rating).
+     * Penting untuk digunakan di View dan untuk mencegah error di Controller saat mengurutkan.
+     */
+    protected function averageRating(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->reviews()->avg('rating') ?? 0,
+        );
     }
 
     /**

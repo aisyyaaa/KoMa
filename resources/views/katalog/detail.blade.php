@@ -58,7 +58,7 @@
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 
-                {{-- Kolom Kiri: Gambar Produk (HANYA GAMBAR UTAMA) --}}
+                {{-- Kolom Kiri: Gambar Produk --}}
                 <div class="col-span-1">
                     <img 
                         src="{{ $product->primary_image_url ?? asset('images/default-product.png') }}" 
@@ -72,10 +72,11 @@
                 <div class="col-span-2">
                     <h1 class="text-4xl font-extrabold text-koma-primary mb-2">{{ $product->name }}</h1>
                     
-                    {{-- Rating Rata-Rata --}}
+                    {{-- Rating Rata-Rata (SRS-MartPlace-04) --}}
                     <div class="flex items-center mb-4">
                         @php
-                            $avgRating = $product->averageRating();
+                            // PERBAIKAN FATAL: Mengganti method() menjadi properti Accessor
+                            $avgRating = $product->average_rating;
                             $rating = round($avgRating);
                         @endphp
                         {{-- Bintang Rata-Rata --}}
@@ -133,6 +134,7 @@
             <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-lg">
                 <h2 class="text-2xl font-bold mb-6 border-b pb-2">Ulasan Pembeli ({{ $product->reviews->count() }})</h2>
 
+                {{-- Catatan: Reviews diasumsikan sudah di-Eager Load di Controller --}}
                 @forelse ($product->reviews->sortByDesc('reviewed_at') as $review)
                     <div class="border-b pb-4 mb-4">
                         {{-- Bintang Ulasan --}}
@@ -145,7 +147,8 @@
                         
                         <p class="text-sm text-gray-500 mb-2">
                             Dari <strong>{{ $review->province ?? 'Lokasi Tidak Diketahui' }}</strong> | 
-                            <span class="italic text-xs">Tanggal: {{ optional($review->reviewed_at)->format('d M Y') }}</span>
+                            <span class="italic text-xs">Tanggal: {{ $review->reviewed_at?->format('d M Y') }}</span>
+                            {{-- Menggunakan nullsafe operator Laravel untuk menghindari optional() --}}
                         </p>
                         
                         <p class="text-gray-700">{{ $review->comment }}</p>
@@ -179,8 +182,8 @@
                     <div class="mb-4">
                         <label for="comment" class="block text-gray-700 font-semibold mb-2">Komentar</label>
                         <textarea name="comment" id="comment" rows="3" required
-                                  class="w-full p-2 border rounded-md @error('comment') border-red-500 @enderror"
-                                  placeholder="Tulis ulasan Anda di sini..." oninput="validateForm()">{{ old('comment') }}</textarea>
+                                 class="w-full p-2 border rounded-md @error('comment') border-red-500 @enderror"
+                                 placeholder="Tulis ulasan Anda di sini..." oninput="validateForm()">{{ old('comment') }}</textarea>
                         <p id="commentWarning" class="field-warning" style="display: none;">Komentar wajib diisi.</p>
                         @error('comment') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -226,7 +229,7 @@
                     <div class="mb-4">
                         <label for="province" class="block text-sm text-gray-700 mb-1">Provinsi Asal</label>
                         <select name="province" id="province" required 
-                                class="w-full p-2 border rounded-md text-sm @error('province') border-red-500 @enderror" onchange="validateForm()">
+                                 class="w-full p-2 border rounded-md text-sm @error('province') border-red-500 @enderror" onchange="validateForm()">
                             <option value="">-- Pilih Provinsi --</option>
                             @php
                                 $provinces = ['DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Jawa Timur', 'Sumatera Utara', 'Sulawesi Selatan', 'Bali'];

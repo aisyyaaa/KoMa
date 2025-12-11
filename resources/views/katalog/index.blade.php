@@ -275,7 +275,7 @@
                                 {{-- Rating Rata-rata (SRS-MartPlace-04) --}}
                                 <div class="flex items-center mt-1">
                                     @php
-                                        $avgRating = $product->averageRating();
+                                        $avgRating = $product->average_rating; // Perbaikan: Akses sebagai properti
                                         $rating = round($avgRating);
                                     @endphp
                                     {{-- Tampilkan Bintang --}}
