@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\CatalogController; 
 use App\Http\Controllers\Review\ReviewController; 
+// --- AUTH CONTROLLERS (App\Http\Controllers\Auth) ---
 use App\Http\Controllers\Auth\SellerAuthController; 
 use App\Http\Controllers\Auth\SellerVerificationController as SellerVerify; 
 use App\Http\Controllers\Auth\AuthController; 
+
+// --- SELLER CONTROLLERS (App\Http\Controllers\Seller) ---
 use App\Http\Controllers\Seller\SellerDashboardController;
 use App\Http\Controllers\Seller\SellerOrderController; 
 use App\Http\Controllers\Seller\SellerProductController;
@@ -13,10 +16,14 @@ use App\Http\Controllers\Seller\SellerReviewController;
 use App\Http\Controllers\Seller\SellerProfileController;
 use App\Http\Controllers\Seller\Api\SellerChartController;
 use App\Http\Controllers\Seller\Api\SellerDataController;
+
+// --- PLATFORM CONTROLLERS (App\Http\Controllers\Platform) ---
 use App\Http\Controllers\Platform\PlatformDashboardController; 
 use App\Http\Controllers\Platform\PlatformAnalyticsController; 
 use App\Http\Controllers\Platform\PlatformReportController; 
 use App\Http\Controllers\Platform\Auth\PlatformAuthController; 
+
+// --- LARAVEL FACADES ---
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,7 +41,7 @@ Route::get('/katalog', [CatalogController::class, 'index'])->name('katalog.index
 // Prioritas rute autocomplete
 Route::get('/katalog/autocomplete', [CatalogController::class, 'autocomplete'])->name('katalog.autocomplete');
 Route::get('/katalog/{product:slug}', [CatalogController::class, 'show'])->name('katalog.show'); 
-Route::post('/katalog/{product}/review', [ReviewController::class, 'store'])->name('review.store');
+Route::post('/katalog/{product}/review', [ReviewController::class, 'store'])->name('review.store'); // Pemberian komentar dan rating
 
 
 // --- 2. Global Authentication (Login/Logout, Pilihan Pendaftaran) ---
@@ -92,8 +99,8 @@ Route::middleware(['auth:seller'])->prefix('seller')->name('seller.')->group(fun
     Route::resource('products', SellerProductController::class);
 
     // Order (Opsional: Jika ada Order Process)
-    Route::get('orders', [SellerOrderController::class, 'index'])->name('orders.index');
-    Route::post('orders/{order}/status', [SellerOrderController::class, 'update'])->name('orders.update');
+    Route::get('orders', [\App\Http\Controllers\Seller\SellerOrderController::class, 'index'])->name('orders.index');
+    Route::post('orders/{order}/status', [\App\Http\Controllers\Seller\SellerOrderController::class, 'update'])->name('orders.update');
 
     // Review/Rating (Melihat Review Produknya)
     Route::get('reviews', [SellerReviewController::class, 'index'])->name('reviews.index');

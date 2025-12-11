@@ -13,7 +13,7 @@ class SellerProductController extends Controller
     public function index()
     {
         // Development: allow listing without auth
-        $sellerId = auth()->id() ?? 1; // fallback to demo seller id
+        $sellerId = auth()->id();
         
         // Get all categories for filter dropdown
         $categories = Category::all();

@@ -6,8 +6,7 @@
     <title>Masuk Penjual KoMa Market</title>
     {{-- Memastikan styling Tailwind di-load --}}
     @vite('resources/css/app.css') 
-    {{-- Kita asumsikan Anda memiliki warna kustom di tailwind.config.js, 
-         misalnya: bg-koma-accent, text-koma-primary, dll. --}}
+    {{-- Kita asumsikan Anda memiliki warna kustom di tailwind.config.js --}}
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
 
@@ -46,7 +45,14 @@
                     Masukkan email dan kata sandi Anda untuk melanjutkan.
                 </p>
 
-                {{-- Alert Error --}}
+                {{-- Alert Sukses (Digabung dari versi teman) --}}
+                @if (session('status'))
+                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-6 text-sm" role="alert">
+                        <p class="text-xs">{{ session('status') }}</p>
+                    </div>
+                @endif
+                
+                {{-- Alert Error (Versi kita, termasuk error validasi atau error akun non-aktif) --}}
                 @if ($errors->any())
                     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6 text-sm" role="alert">
                         <strong class="font-bold block mb-1">Login Gagal</strong>
@@ -54,7 +60,8 @@
                     </div>
                 @endif
 
-                <form action="{{ route('login.post') }}" method="POST" class="space-y-6">
+                {{-- Form Action diatur ke rute login Penjual yang spesifik --}}
+                <form action="{{ route('seller.auth.login.post') }}" method="POST" class="space-y-6">
                     @csrf
 
                     {{-- Input Email --}}
@@ -92,7 +99,7 @@
                                         {{ $errors->has('password') ? 'border-red-500' : 'border-gray-300' }}"
                                 placeholder="••••••••"
                                 required>
-                            {{-- Tombol Toggle Password --}}
+                            {{-- Tombol Toggle Password (Pastikan script JS ada di bagian bawah) --}}
                             <button 
                                 type="button" 
                                 class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-koma-primary transition"
@@ -132,16 +139,17 @@
                     </button>
                 </form>
 
-                {{-- Tautan Lain --}}
+                {{-- Tautan Lain (Pendaftaran & Kembali ke Beranda) --}}
                 <div class="text-center mt-8">
                     <p class="text-gray-600 text-sm">
                         Belum punya akun? 
+                        {{-- Tautan ke halaman pilihan pendaftaran --}}
                         <a href="{{ route('register.choice') }}" class="text-koma-primary hover:text-koma-danger font-semibold transition duration-150">
                             Daftar Sekarang
                         </a>
                     </p>
                     <div class="pt-4 mt-6 border-t border-gray-200">
-                        <a href="{{ route('katalog.index') }}" class="text-sm text-koma-accent hover:text-koma-primary font-semibold transition duration-150">
+                        <a href="{{ route('katalog.index') }}" class="text-sm text-koma-accent hover:text-koma-primary font-semibold mt-3 block transition duration-150">
                             ← Kembali ke Halaman Beranda
                         </a>
                     </div>
@@ -151,7 +159,7 @@
         </div>
     </div>
 
-    {{-- Script untuk Toggle Password tetap sama --}}
+    {{-- Script untuk Toggle Password --}}
     <script>
         function togglePasswordVisibility() {
             const passwordInput = document.getElementById('password');
@@ -159,12 +167,10 @@
             
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                // Mengubah ikon menjadi mata terbuka jika perlu, dan berikan warna aktif
                 eyeIcon.setAttribute('d', 'M10 12a2 2 0 100-4 2 2 0 000 4z'); 
                 eyeIcon.classList.add('text-koma-primary');
             } else {
                 passwordInput.type = 'password';
-                // Mengubah ikon menjadi mata tertutup dan menghilangkan warna aktif
                 eyeIcon.setAttribute('d', 'M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z');
                 eyeIcon.classList.remove('text-koma-primary');
             }
