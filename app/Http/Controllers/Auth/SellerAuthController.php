@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use App\Models\Seller;
-use Illuminate\Support\Facades\Mail; // Diperlukan untuk SRS-MartPlace-02 (Notifikasi)
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage; // Tambahkan untuk cleanup file jika gagal
 
 class SellerAuthController extends Controller
 {
@@ -18,7 +19,6 @@ class SellerAuthController extends Controller
      */
     public function showRegister()
     {
-        // Pastikan path view ini benar: resources/views/seller/auth/register.blade.php
         return view('seller.auth.register');
     }
 
@@ -41,7 +41,7 @@ class SellerAuthController extends Controller
             'no_hp_pic' => 'required|string|max:15|unique:sellers,phone_number', // 4. No Handphone PIC
             
             // Detail Alamat PIC
-            'alamat_pic' => 'required|string', // 6. Alamat (nama jalan) PIC
+            'alamat_pic' => 'required|string|max:255', // 6. Alamat (nama jalan) PIC
             'rt' => 'required|string|max:5', // 7. RT
             'rw' => 'required|string|max:5', // 8. RW
             'nama_kelurahan' => 'required|string|max:100', // 9. Nama kelurahan (village)
@@ -57,6 +57,9 @@ class SellerAuthController extends Controller
         
         // --- 2. Proses Penyimpanan Data dan File ---
         DB::beginTransaction();
+        $fotoPath = null;
+        $ktpPath = null;
+        
         try {
             // Logika Upload File
             // Pastikan Anda sudah menjalankan 'php artisan storage:link'
@@ -72,7 +75,7 @@ class SellerAuthController extends Controller
                 
                 // Data PIC & KTP
                 'pic_name' => $request->nama_pic,
-                'phone_number' => $request->no_hp_pic, // Disesuaikan: phone_number
+                'phone_number' => $request->no_hp_pic,
                 'ktp_number' => $request->no_ktp_pic,
                 'pic_photo_path' => $fotoPath,
                 'ktp_file_path' => $ktpPath,
@@ -81,21 +84,18 @@ class SellerAuthController extends Controller
                 'address' => $request->alamat_pic,
                 'rt' => $request->rt,
                 'rw' => $request->rw,
-                'village' => $request->nama_kelurahan, // Disesuaikan: village
-                'district' => $request->nama_kecamatan, // Disesuaikan: district (Kecamatan)
-                'city' => $request->kabupaten_kota, // Disesuaikan: city
-                'province' => $request->propinsi, // Disesuaikan: province
+                'village' => $request->nama_kelurahan,
+                'district' => $request->nama_kecamatan,
+                'city' => $request->kabupaten_kota,
+                'province' => $request->propinsi,
 
-                // Status Verifikasi (SRS-MartPlace-02)
+                // Status Verifikasi (SRS-MartPlace-02) -- FIX: Mengganti verification_status menjadi STATUS
                 'is_active' => false, 
-                'verification_status' => 'pending', 
-                'registration_date' => now(), // Mencatat tanggal dan waktu (datetime)
+                'status' => 'PENDING', // MENGGUNAKAN NAMA KOLOM DAN NILAI UPPERCASE DARI MIGRATION
+                'registration_date' => now(), 
             ]);
 
             // --- 3. Notifikasi Verifikasi (SRS-MartPlace-02) ---
-            // Kirim notifikasi ke Platform/Admin bahwa ada pendaftaran baru.
-            // Kirim notifikasi ke Penjual (email) bahwa pendaftaran sedang diverifikasi.
-            // Contoh (Asumsi Anda punya Mailable):
             // Mail::to($seller->email)->send(new SellerRegistrationPendingNotification($seller));
 
             DB::commit();
@@ -105,8 +105,16 @@ class SellerAuthController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
-            // Anda bisa log $e->getMessage() di sini
-            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal mendaftar. Silakan coba lagi.']);
+            
+            // Hapus file yang mungkin sudah di-upload jika terjadi kegagalan Database
+            if ($fotoPath) Storage::disk('public')->delete($fotoPath);
+            if ($ktpPath) Storage::disk('public')->delete($ktpPath);
+            
+            // Logging detail error (Wajib)
+            logger()->error('Gagal Registrasi Penjual (Fatal):', ['exception' => $e->getMessage(), 'trace' => $e->getTraceAsString(), 'request' => $request->all()]);
+            
+            // Tampilkan error umum ke user
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal mendaftar. Terjadi kesalahan sistem. Silakan cek log file Anda.']);
         }
     }
 
@@ -131,15 +139,14 @@ class SellerAuthController extends Controller
         if (Auth::guard('seller')->attempt($credentials, $request->boolean('remember'))) {
             $seller = Auth::guard('seller')->user();
             
-            // Cek status aktif (Sesuai deskripsi: Akun dikelola oleh platform untuk status aktif/tidak)
             if (!$seller->is_active) {
                 Auth::guard('seller')->logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
-                // Notifikasi disesuaikan untuk menunjukkan status verifikasi
+                // Status di DB sekarang 'status', bukan 'verification_status'
                 return redirect()->route('seller.auth.verify')
-                                 ->withErrors(['login_error' => 'Akun Anda belum aktif. Status saat ini: ' . ucfirst($seller->verification_status) . '. Mohon tunggu aktivasi dari Platform.']);
+                                 ->withErrors(['login_error' => 'Akun Anda belum aktif. Status saat ini: ' . ucfirst($seller->status) . '. Mohon tunggu aktivasi dari Platform.']);
             }
             
             $request->session()->regenerate();

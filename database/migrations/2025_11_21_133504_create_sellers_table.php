@@ -43,8 +43,9 @@ return new class extends Migration
             $table->string('ktp_file_path'); // Path File KTP PIC
             
             // --- STATUS AKUN & VERIFIKASI (SRS-MartPlace-02) ---
-            // Status Verifikasi (Misalnya: pending, approved, rejected)
-            $table->enum('verification_status', ['pending', 'approved', 'rejected'])->default('pending'); 
+            // KOREKSI: Mengubah 'verification_status' menjadi 'status' dan nilai enum menjadi uppercase
+            $table->enum('status', ['PENDING', 'ACTIVE', 'REJECTED'])->default('PENDING'); 
+            
             // Status Akun Aktif/Tidak Aktif (Digunakan saat Login)
             $table->boolean('is_active')->default(false); // Status aktif akun (true jika sudah di-approve Platform)
             

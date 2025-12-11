@@ -74,7 +74,6 @@ Route::prefix('seller/auth')->name('seller.auth.')->group(function () {
 
     // Verification Penjual (SRS-MartPlace-02)
     Route::get('verify', [SellerVerify::class, 'show'])->name('verify');
-    // Tombol 'Kirim Ulang Email Verifikasi' dihapus (Sesuai keputusan terakhir)
 });
 
 
@@ -145,6 +144,12 @@ Route::prefix('platform')->name('platform.')->group(function () {
             Route::get('{seller}', [PlatformSellerVerify::class, 'show'])->name('show');
             Route::post('{seller}/approve', [PlatformSellerVerify::class, 'approve'])->name('approve');
             Route::post('{seller}/reject', [PlatformSellerVerify::class, 'reject'])->name('reject');
+            
+            // KOREKSI 1: Route PATCH untuk update status dari tabel index
+            Route::patch('{seller}/status', [PlatformSellerVerify::class, 'updateStatus'])->name('status'); 
+
+            // KOREKSI 2: Route POST untuk Kirim Notifikasi/Aktivasi Email (notify)
+            Route::post('{seller}/notify', [PlatformSellerVerify::class, 'sendActivationEmail'])->name('notify'); 
         });
 
         // Laporan (SRS-MartPlace-09, 10, 11)

@@ -3,12 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifikasi Penjual KoMa Market</title>
+    <title>Status Verifikasi Penjual | KoMa Market</title>
     @vite('resources/css/app.css')
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen py-8">
 
+    {{-- Asumsi: Variabel $seller (Model Seller) tersedia di view ini --}}
+    @php
+        // Ambil email dari model $seller. Jika tidak ada, gunakan Auth::user() atau default.
+        $sellerEmail = $seller->email ?? (Auth::guard('seller')->check() ? Auth::guard('seller')->user()->email : 'email Anda');
+    @endphp
+
     <div class="w-full max-w-md bg-white p-8 rounded-lg shadow-xl">
+        {{-- Status Flash Message dari Controller (misal: pendaftaran berhasil) --}}
+        @if (session('status'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-4 text-sm" role="alert">
+                {{ session('status') }}
+            </div>
+        @endif
+        @if ($errors->has('login_error'))
+             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm" role="alert">
+                {{ $errors->first('login_error') }}
+            </div>
+        @endif
+
         <div class="text-center mb-8">
             <div class="w-16 h-16 bg-koma-bg-light rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg class="w-8 h-8 text-koma-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -28,7 +46,8 @@
                 </li>
                 <li class="flex items-start">
                     <span class="inline-block w-5 h-5 rounded-full bg-koma-accent text-white flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">2</span>
-                    <span>Kami akan mengirimkan email konfirmasi ke <span class="font-semibold text-koma-text-dark">{{ $email ?? 'email Anda' }}</span></span>
+                    {{-- Menggunakan $sellerEmail yang sudah diolah --}}
+                    <span>Kami akan mengirimkan email konfirmasi ke <span class="font-semibold text-koma-text-dark">{{ $sellerEmail }}</span></span>
                 </li>
                 <li class="flex items-start">
                     <span class="inline-block w-5 h-5 rounded-full bg-koma-accent text-white flex items-center justify-center text-xs mr-2 mt-0.5 flex-shrink-0">3</span>
@@ -44,8 +63,8 @@
         </div>
 
         <div class="space-y-3">
-
-            <a href="{{ route('landingpage.index') }}" 
+            {{-- KOREKSI KRITIS: Mengubah landingpage.index menjadi katalog.index --}}
+            <a href="{{ route('katalog.index') }}" 
                class="block w-full py-3 px-4 bg-koma-primary text-white font-semibold rounded-lg 
                       text-center shadow-md hover:bg-koma-danger transition duration-200">
                 Kembali ke Halaman Beranda

@@ -24,7 +24,7 @@ class Seller extends Authenticatable
         // PIC (person in charge) and contact
         'pic_name',
         'phone_number',
-        'ktp_number',
+        'ktp_number', // Kolom ini ada di migrasi
 
         // Address details
         'address',
@@ -41,7 +41,7 @@ class Seller extends Authenticatable
 
         // Status / verification
         'is_active',
-        'verification_status',
+        'status', // <--- KOREKSI KRITIS: Menggunakan 'status' sesuai migrasi dan controller
         'registration_date',
     ];
 
@@ -57,15 +57,19 @@ class Seller extends Authenticatable
      * Atribut yang harus di-cast ke tipe bawaan.
      */
     protected $casts = [
-        'is_active' => 'boolean', // Status aktif adalah boolean
-        'registration_date' => 'datetime', // Tanggal pendaftaran adalah datetime
+        'is_active' => 'boolean', 
+        'registration_date' => 'datetime', 
     ];
+    
+    // Guard yang digunakan untuk otentikasi
+    protected $guard = 'seller';
 
     /**
      * Relasi dengan Produk.
      */
     public function products()
     {
+        // Pastikan model Product di-import atau menggunakan namespace penuh jika diperlukan
         return $this->hasMany(Product::class);
     }
 }
