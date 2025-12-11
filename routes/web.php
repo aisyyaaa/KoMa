@@ -4,7 +4,7 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\Review\ReviewController; 
 // --- AUTH CONTROLLERS (App\Http\Controllers\Auth) ---
 use App\Http\Controllers\Auth\SellerAuthController; 
-use App\Http\Controllers\Auth\SellerVerificationController as SellerVerify; // << Dibuat di langkah sebelumnya
+use App\Http\Controllers\Auth\SellerVerificationController as SellerVerify;
 use App\Http\Controllers\Auth\AuthController; 
 
 // --- SELLER CONTROLLERS (App\Http\Controllers\Seller) ---
@@ -21,7 +21,7 @@ use App\Http\Controllers\Seller\Api\SellerDataController;
 use App\Http\Controllers\Platform\PlatformDashboardController; 
 use App\Http\Controllers\Platform\PlatformAnalyticsController; 
 use App\Http\Controllers\Platform\PlatformReportController; 
-use App\Http\Controllers\Platform\SellerVerificationController as PlatformSellerVerify; // << Controller Platform Verifikasi
+use App\Http\Controllers\Platform\SellerVerificationController as PlatformSellerVerify;
 
 // --- LARAVEL FACADES ---
 use Illuminate\Support\Facades\Route;
@@ -40,6 +40,7 @@ Route::get('/', [CatalogController::class, 'index'])->name('katalog.index');
 Route::get('/katalog', [CatalogController::class, 'index'])->name('katalog.index.alt'); 
 Route::get('/katalog/autocomplete', [CatalogController::class, 'autocomplete'])->name('katalog.autocomplete');
 Route::get('/katalog/{product:slug}', [CatalogController::class, 'show'])->name('katalog.show'); 
+// Pemberian Komentar dan Rating (SRS-MartPlace-06)
 Route::post('/katalog/{product}/review', [ReviewController::class, 'store'])->name('review.store');
 
 
@@ -72,8 +73,8 @@ Route::prefix('seller/auth')->name('seller.auth.')->group(function () {
     Route::post('login', [SellerAuthController::class, 'login'])->name('login.post');
 
     // Verification Penjual (SRS-MartPlace-02)
-    // Menggunakan Controller SellerVerificationController yang baru dibuat
     Route::get('verify', [SellerVerify::class, 'show'])->name('verify');
+    // Tombol 'Kirim Ulang Email Verifikasi' dihapus (Sesuai keputusan terakhir)
 });
 
 
@@ -128,12 +129,10 @@ Route::middleware(['auth:seller'])->prefix('seller')->name('seller.')->group(fun
 
 /*
 |--------------------------------------------------------------------------
-| Platform Admin Area (Selesai SRS-MartPlace-02)
+| Platform Admin Area (SRS-MartPlace-02)
 |--------------------------------------------------------------------------
 */
-// CATATAN: Middleware Otentikasi Admin Platform (seperti auth:platform) disarankan di sini.
 Route::prefix('platform')->name('platform.')->group(function () {
-    // ... (Login Platform seharusnya ada di sini, tapi dihilangkan di template sebelumnya)
 
     Route::group([], function () {
         
@@ -141,7 +140,6 @@ Route::prefix('platform')->name('platform.')->group(function () {
         Route::get('dashboard', [PlatformDashboardController::class, 'index'])->name('dashboard');
 
         // Verifikasi Penjual (SRS-MartPlace-02)
-        // Menggunakan Controller PlatformSellerVerify yang baru diimpor
         Route::prefix('verifications/sellers')->name('verifications.sellers.')->group(function () {
             Route::get('', [PlatformSellerVerify::class, 'index'])->name('index');
             Route::get('{seller}', [PlatformSellerVerify::class, 'show'])->name('show');
