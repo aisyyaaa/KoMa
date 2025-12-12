@@ -6,16 +6,34 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Seller;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Database\Eloquent\Builder; // Import Builder
 
 class PlatformVerificationController extends Controller
 {
     /**
      * Display a listing of sellers awaiting verification.
      */
-    public function index()
+    public function index(Request $request) 
     {
-        $pending_sellers = Seller::where('status', 'PENDING')->latest()->paginate(10);
-        return view('platform.verifications.index', compact('pending_sellers'));
+        $searchQuery = trim($request->get('search')); // FIX 1: Ambil dan bersihkan query pencarian
+        
+        $query = Seller::where('status', 'PENDING');
+
+        // FIX 2: Tambahkan Filter Pencarian HANYA JIKA query tidak kosong setelah di-trim
+        if (!empty($searchQuery)) { 
+            $query->where(function (Builder $q) use ($searchQuery) {
+                // Cari di Nama Toko, PIC, Email, atau Nomor Telepon
+                $q->where('store_name', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('pic_name', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('email', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('phone_number', 'like', '%' . $searchQuery . '%');
+            });
+        }
+        
+        $pending_sellers = $query->latest()->paginate(10)->withQueryString();
+        
+        // Kirimkan searchQuery kembali ke view untuk mengisi input form
+        return view('platform.verifications.index', compact('pending_sellers', 'searchQuery'));
     }
 
     /**

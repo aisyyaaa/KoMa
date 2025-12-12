@@ -48,8 +48,8 @@ class Product extends Model
         'min_stock' => 'integer',
     ];
     
-    // Tambahkan accessor URL gambar utama ke Appends
-    protected $appends = ['primary_image_url', 'condition_label']; 
+    // FIX KRITIS: Tambahkan accessor URL gambar tambahan ke Appends
+    protected $appends = ['primary_image_url', 'additional_image_urls', 'condition_label']; 
 
     // --- RELATIONS ---
 
@@ -69,40 +69,43 @@ class Product extends Model
     }
 
     // --- ACCESSORS / VIRTUAL ATTRIBUTES ---
-
+    
     /**
      * ACCESSOR untuk mendapatkan URL gambar utama.
      */
-    protected function primaryImageUrl(): Attribute
+    protected function getPrimaryImageUrlAttribute(): string
     {
-        return Attribute::make(
-            get: function ($value, $attributes) {
-                // Membaca kolom DATABASE ASLI: 'primary_image'
-                $imagePath = $attributes['primary_image'] ?? null; 
-                
-                if (empty($imagePath)) {
-                    // Fallback ke aset default jika path kosong
-                    return asset('images/default_product.png'); 
-                }
+        $imagePath = $this->attributes['primary_image'] ?? null; 
+        
+        if (empty($imagePath)) {
+            // Fallback ke aset default jika path kosong
+            return asset('images/default_product.png'); 
+        }
 
-                // Skenario 1: Path sudah berupa URL lengkap (Seeder)
-                if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
-                    return $imagePath;
-                }
+        // Skenario 1: Path sudah berupa URL lengkap (Seeder)
+        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+            return $imagePath;
+        }
 
-                // Skenario 2: File Path Lokal (Upload)
-                return Storage::url($imagePath);
-            },
-        );
+        // Skenario 2: File Path Lokal (Upload)
+        // FIX KRITIS: Gunakan Storage::url() tanpa pemeriksaan Storage::exists() 
+        // untuk memastikan produk Upload berhasil ditampilkan (asumsi storage:link benar).
+        try {
+            return Storage::url($imagePath);
+        } catch (\Exception $e) {
+            // Fallback jika terjadi error saat memproses path lokal (misalnya path terlalu panjang/rusak)
+            return asset('images/default_product.png');
+        }
     }
 
     /**
      * Accessor untuk mendapatkan array URL gambar tambahan.
      */
-    public function getAdditionalImageUrlsAttribute()
+    public function getAdditionalImageUrlsAttribute(): array
     {
         $images = $this->additional_images ?? [];
         
+        // Pastikan images adalah array, meskipun sudah di-cast, ini untuk keamanan
         if (!is_array($images)) {
             $images = json_decode($images, true) ?: []; 
         }
@@ -112,10 +115,11 @@ class Product extends Model
             if (empty($img)) continue;
             
             if (filter_var($img, FILTER_VALIDATE_URL)) {
-                $urls[] = $img;
+                $urls[] = $img; // URL Eksternal (Seeder)
                 continue;
             }
             
+            // Path Lokal (Upload)
             $urls[] = Storage::url($img);
         }
 

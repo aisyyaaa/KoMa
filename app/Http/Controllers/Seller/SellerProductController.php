@@ -10,6 +10,7 @@ use App\Http\Requests\ProductRequest; // Asumsi ProductRequest sudah ada & beris
 use Illuminate\Support\Str; 
 use Illuminate\Support\Facades\Storage; 
 use Illuminate\Support\Facades\Auth; // Wajib diimport
+use Illuminate\Database\Eloquent\Builder; // Wajib diimport
 
 class SellerProductController extends Controller
 {
@@ -20,10 +21,12 @@ class SellerProductController extends Controller
         $this->middleware('auth:seller'); 
     }
     
-    public function index()
+    public function index(Request $request) // FIX 1: Terima Request
     {
         $sellerId = Auth::guard('seller')->id(); 
-
+        $searchQuery = trim($request->get('search')); // FIX 2: Ambil dan bersihkan query pencarian
+        $categoryId = $request->get('category');
+        
         $categories = Category::all();
         
         // Membangun query dengan load relasi dan agregat
@@ -31,15 +34,22 @@ class SellerProductController extends Controller
                              ->withCount('reviews') // Tambahkan count review untuk tabel index
                              ->withAvg('reviews', 'rating'); // Tambahkan avg rating untuk tabel index
         
-        // Search & Filter (tetap sama)
-        if (request('search')) {
-            $query->where('name', 'like', '%' . request('search') . '%');
-        }
-        if (request('category')) {
-            $query->where('category_id', request('category'));
+        // FIX KRITIS 3: Implementasi Pencarian Fleksibel (Case-Insensitive & Multi-Kolom)
+        if (!empty($searchQuery)) {
+             $searchLower = strtolower($searchQuery);
+             $query->where(function (Builder $q) use ($searchLower) {
+                 // Cari di Nama Produk (name) atau SKU (Case-Insensitive)
+                 $q->whereRaw('LOWER(name) LIKE ?', ['%' . $searchLower . '%'])
+                   ->orWhereRaw('LOWER(sku) LIKE ?', ['%' . $searchLower . '%']);
+             });
         }
         
-        $products = $query->paginate(10);
+        // Filter Kategori
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+        
+        $products = $query->paginate(10)->withQueryString(); // Tambahkan withQueryString()
         
         return view('seller.products.index', ['products' => $products, 'categories' => $categories]);
     }

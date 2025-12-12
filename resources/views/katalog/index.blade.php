@@ -14,6 +14,11 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        /* Style Tambahan untuk Banner */
+        .koma-banner-gradient-revised {
+            /* Gradien lembut dari putih ke pink yang menyatu dengan primary color */
+            background: linear-gradient(90deg, #FFFFFF 60%, #FFE5E5 100%); 
+        }
     </style>
 </head>
 <body class="bg-white text-koma-text-dark">
@@ -78,22 +83,34 @@
     {{-- MAIN CONTENT --}}
     <main class="container mx-auto px-4 mt-6">
         
-        {{-- 1. PROMOTIONAL BANNER --}}
+        {{-- 1. PROMOTIONAL BANNER (REVISI) --}}
         <div class="py-6"> 
-            <div class="bg-koma-bg-light p-8 rounded-xl shadow-lg flex items-center justify-between overflow-hidden relative">
-                <div>
-                    <span class="text-sm text-koma-text-dark font-medium">Spesial Mahasiswa</span>
+            {{-- Mengganti bg-koma-bg-light dengan gradien baru untuk kesan lebih premium --}}
+            <div class="koma-banner-gradient-revised p-8 rounded-xl shadow-lg flex items-center justify-between overflow-hidden relative">
+                
+                {{-- Konten Teks (relative z-10 agar selalu di depan SVG background) --}}
+                <div class="relative z-10">
+                    <span class="text-sm text-gray-700 font-bold tracking-widest uppercase">Spesial Mahasiswa</span>
                     <h2 class="text-4xl font-extrabold mt-2 leading-tight text-koma-primary">Diskon 20% Untuk Produk KoMa</h2>
-                    <p class="mt-3 text-lg text-koma-text-dark">Kumpulkan Koin KoMa Anda Sekarang!</p>
+                    <p class="mt-3 text-lg text-gray-600">Kumpulkan **KoMa Coin** Anda Sekarang & Raih Keuntungan Belanja!</p>
+
+                    {{-- Tombol Call to Action yang jelas --}}
+                    <a href="#" class="mt-4 inline-block px-6 py-3 bg-koma-primary text-white font-semibold rounded-lg shadow-lg hover:bg-koma-danger transition duration-300">
+                        Klaim Diskon Sekarang!
+                    </a>
                 </div>
                 
-                <div class="hidden md:block w-1/3 h-full absolute right-0 top-0">
-                    <img src="https://via.placeholder.com/350x200/cad7fa/5d5e62?text=Promo+Diskon" alt="Promo Diskon" class="w-full h-full object-cover rounded-r-xl opacity-70">
+                {{-- Elemen Desain Abstrak/Ikon Keranjang Besar (Pengganti Gambar 'Promo Diskon' yang tidak tampil) --}}
+                <div class="hidden md:block w-40 h-full absolute right-0 top-0 overflow-hidden pointer-events-none z-0">
+                    {{-- Menggunakan SVG Keranjang dengan opacity rendah sebagai dekorasi background --}}
+                    <svg class="w-64 h-64 absolute -right-12 -top-12 text-koma-primary opacity-20 transform rotate-12" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-3.8-2.67l-1.9-4.75c-.24-.59-.79-.98-1.41-.98H7.13L5.66 4.96c-.1-.3-.4-.5-.73-.5H3c-.55 0-1 .45-1 1s.45 1 1 1h2.15l1.62 4.05L7 11.25V12h11c.55 0 1-.45 1-1s-.45-1-1-1H9.83l.53-1.33 2.15 4.75c.17.41.6.66 1.07.66.72 0 1.28-.62 1.28-1.35V7c0-.55-.45-1-1-1s-1 .45-1 1v4h-1.63L11.88 7.37c.1-.3.4-.5.73-.5h4.16c.55 0 1 .45 1 1s-.45 1-1 1h-3.85L13.2 14.67z"/>
+                    </svg>
                 </div>
             </div>
         </div>
 
-        {{-- ⚠️ KATEGORI BARIS ATAS (PERBAIKAN KONSISTENSI & IKON) --}}
+        {{-- ⚠️ KATEGORI BARIS ATAS (FIX KONSISTENSI WARNA IKON) --}}
         <div class="py-6"> 
             <h2 class="text-2xl font-bold border-b pb-2 mb-6 text-koma-text-dark">Jelajahi Kategori Pilihan</h2>
             
@@ -101,17 +118,20 @@
                 
                 @foreach ($categories as $category)
                     @php
-                        // Membuat link filter yang mempertahankan query lain, hanya mengubah kategori
                         $categoryLink = route('katalog.index', array_merge(request()->query(), ['category' => $category->slug, 'page' => 1]));
                         $isActive = ($activeFilters['category'] ?? null) === $category->slug;
                     @endphp
 
                     <a href="{{ $categoryLink }}" 
-                        {{-- ⚠️ Class flex-shrink-0 DITAMBAHKAN untuk menjamin lebar w-32 --}}
-                        class="flex-shrink-0 w-32 h-36 flex flex-col items-center justify-center p-3 rounded-xl border {{ $isActive ? 'border-koma-primary shadow-xl bg-koma-hover-light' : 'border-koma-bg-light shadow-md' }} hover:shadow-xl hover:bg-koma-hover-light transition duration-150 group">
+                        class="flex-shrink-0 w-32 h-36 flex flex-col items-center justify-center p-3 rounded-xl border 
+                        {{-- Warna Active diubah ke PRIMARY/PINK --}}
+                        {{ $isActive ? 'border-koma-primary shadow-xl bg-koma-hover-light' : 'border-koma-bg-light shadow-md' }} 
+                        hover:shadow-xl hover:bg-koma-hover-light transition duration-150 group">
                         
-                        {{-- Icon Box: Warna dinamis dari $category->color --}}
-                        <div class="w-16 h-16 bg-koma-bg-light rounded-xl flex items-center justify-center mb-3 group-hover:bg-{{ $category->color }} transition duration-150 text-{{ $category->color }} group-hover:text-white">
+                        {{-- FIX KRITIS: ICON BOX. Warna ikon default diseragamkan ke koma-primary --}}
+                        <div class="w-16 h-16 bg-koma-bg-light rounded-xl flex items-center justify-center mb-3 
+                                    group-hover:bg-koma-primary transition duration-150 
+                                    text-koma-primary group-hover:text-white"> {{-- ICON DEFAULT: koma-primary --}}
                             {!! $category->icon_svg !!}
                         </div>
                         
@@ -167,7 +187,6 @@
                                 <option value="">Semua Kota/Kabupaten</option>
                                 
                                 @php
-                                    // Ambil semua kota unik dari seluruh data penjual
                                     $allCities = collect($locations)->flatMap(function ($cities) {
                                         return array_keys($cities);
                                     })->unique()->sort();
@@ -188,7 +207,6 @@
                                 <option value="">Semua Kecamatan</option>
                                 
                                 @php
-                                    // Ambil semua kecamatan unik dari seluruh data penjual
                                     $allDistricts = collect($locations)->flatMap(function ($cities) {
                                         return collect($cities)->flatten();
                                     })->unique()->sort();
@@ -229,7 +247,7 @@
                         Hasil Pencarian 
                         <span class="text-lg font-normal text-gray-500">
                             @if ($activeFilters['q'] ?? false)
-                            untuk "{{ $activeFilters['q'] }}"
+                                untuk "{{ $activeFilters['q'] }}"
                             @endif
                             ({{ $products->total() }} Produk Ditemukan)
                         </span>
@@ -246,7 +264,6 @@
                             {{-- Gambar dan Link ke Detail Produk --}}
                             <a href="{{ route('katalog.show', $product->slug) }}" class="block h-52 overflow-hidden">
                                 <img 
-                                    {{-- KOREKSI FINAL: Menggunakan Accessor yang benar: primary_image_url --}}
                                     src="{{ $product->primary_image_url ?? 'https://via.placeholder.com/300x200/dde0e7/5d5e62?text=KoMa+Market' }}" 
                                     alt="{{ $product->name }}" 
                                     class="w-full h-full object-cover hover:scale-105 transition duration-300"
@@ -272,7 +289,6 @@
                                 {{-- Rating Rata-rata (SRS-MartPlace-04) --}}
                                 <div class="flex items-center mt-1">
                                     @php
-                                        // MENGGUNAKAN NAMA FIELD DARI withAvg & withCount di Controller
                                         $avgRating = $product->reviews_avg_rating ?? $product->rating_average ?? 0; 
                                         $reviewCount = $product->reviews_count ?? 0;
                                         $rating = round($avgRating);
@@ -298,6 +314,9 @@
                             <p class="text-xl text-gray-600">
                                 Maaf, tidak ada produk yang ditemukan.
                             </p>
+                            @if ($isFiltering)
+                                <p class="text-sm text-gray-500 mt-2">Coba hapus filter atau periksa kembali kata kunci pencarian Anda.</p>
+                            @endif
                         </div>
                     @endforelse
                 </div>

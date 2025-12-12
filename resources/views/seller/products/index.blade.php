@@ -78,10 +78,10 @@
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-10 w-10">
-                                {{-- KOREKSI KRITIS: Memperbaiki path gambar menggunakan Storage::url --}}
+                                {{-- FIX KRITIS: Menggunakan accessor primary_image_url --}}
                                 <img class="h-10 w-10 rounded-md object-cover" 
-                                     src="{{ $product->primary_image ? Storage::url($product->primary_image) : asset('storage/product_images/default.png') }}" 
-                                     alt="{{ $product->name }}">
+                                    src="{{ $product->primary_image_url }}" 
+                                    alt="{{ $product->name }}">
                             </div>
                             <div class="ml-4">
                                 <div class="text-sm font-medium text-gray-900">{{ $product->name }}</div>
