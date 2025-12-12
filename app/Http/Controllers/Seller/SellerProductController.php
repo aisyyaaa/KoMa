@@ -7,21 +7,23 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
 use App\Http\Requests\ProductRequest;
-use Illuminate\Support\Str; // PENTING: Tambahkan untuk generate slug
+use Illuminate\Support\Str; 
+use Illuminate\Support\Facades\Storage; 
 
 class SellerProductController extends Controller
 {
+    // ... (index dan create methods tetap sama)
+
     public function index()
     {
-        // Mendapatkan ID penjual yang sedang login
-        // Gunakan auth()->id() untuk lingkungan produksi, atau hardcode untuk dev/testing.
-        $sellerId = auth()->id() ?? 1; // Default ke ID 1 jika belum login (untuk testing)
+        $sellerId = auth()->id() ?? 1; 
 
-        // Dapatkan semua kategori untuk dropdown filter
         $categories = Category::all();
         
-        // Membangun query
-        $query = Product::where('seller_id', $sellerId);
+        // Membangun query dengan load relasi dan agregat
+        $query = Product::where('seller_id', $sellerId)
+                         ->withCount('reviews') // Tambahkan count review untuk tabel index
+                         ->withAvg('reviews', 'rating'); // Tambahkan avg rating untuk tabel index
         
         // Search & Filter
         if (request('search')) {
@@ -46,16 +48,17 @@ class SellerProductController extends Controller
     {
         $validated = $request->validated();
         
-        // FIX FATAL 1: Generate SLUG dari Nama Produk (Wajib, karena kolom NOT NULL)
+        // 1. Generate SLUG dari Nama Produk
         $validated['slug'] = Str::slug($validated['name']);
 
-        // Handle upload gambar utama
-        if ($request->hasFile('primary_images')) {
-            $path = $request->file('primary_images')->store('products', 'public');
-            $validated['primary_images'] = $path;
+        // 2. Handle upload gambar utama
+        if ($request->hasFile('primary_image')) {
+            $path = $request->file('primary_image')->store('products', 'public');
+            // FIX KRITIS 1: Menggunakan primary_image_path (sesuai Model Accessor/DB)
+            $validated['primary_image_path'] = $path; 
         }
 
-        // Handle gambar tambahan
+        // 3. Handle gambar tambahan
         if ($request->hasFile('additional_images')) {
             $paths = [];
             foreach ($request->file('additional_images') as $file) {
@@ -63,17 +66,16 @@ class SellerProductController extends Controller
                     $paths[] = $file->store('products', 'public');
                 }
             }
-            // Pastikan additional_images disimpan sebagai JSON atau format array di DB
-            $validated['additional_images'] = json_encode($paths); 
+            // FIX KRITIS 2: Hapus json_encode(), Model akan mengurus cast ke array.
+            $validated['additional_images'] = $paths; 
         } else {
-             // Pastikan additional_images diset null/empty array jika tidak ada upload
-             $validated['additional_images'] = json_encode([]);
+            $validated['additional_images'] = null; 
         }
 
-        // Set seller_id
-        $validated['seller_id'] = auth()->id() ?? 1; // Menggunakan hardcode ID 1 untuk testing jika tidak ada Auth
-
-        // Buat produk baru
+        // 4. Set seller_id
+        $validated['seller_id'] = auth()->id() ?? 1; 
+        
+        // 5. Buat produk baru
         Product::create($validated);
 
         return redirect()->route('seller.products.index')->with('success', 'Produk berhasil ditambahkan');
@@ -81,13 +83,15 @@ class SellerProductController extends Controller
 
     public function show(Product $product)
     {
+        // Load reviews di halaman show untuk manajemen penjual
+        $product->load(['category', 'reviews']); 
+        
         return view('seller.products.show', ['product'=> $product]);
     }
 
     public function edit(Product $product)
     {
         $categories = Category::all();
-        
         return view('seller.products.edit', ['product'=> $product, 'categories' => $categories]);
     }
     
@@ -95,27 +99,30 @@ class SellerProductController extends Controller
     {
         $validated = $request->validated();
         
-        // FIX FATAL 2: Generate SLUG untuk update (jika nama berubah)
-        // Kita perlu memastikan slug diupdate jika nama produk berubah
+        // 1. Generate SLUG untuk update
         if ($validated['name'] !== $product->name) {
             $validated['slug'] = Str::slug($validated['name']);
         }
 
-        // Handle upload gambar utama baru
-        if ($request->hasFile('primary_images')) {
-            // OPTIONAL: Hapus gambar lama sebelum menyimpan yang baru
-            // Storage::disk('public')->delete($product->primary_images); 
-            $path = $request->file('primary_images')->store('products', 'public');
-            $validated['primary_images'] = $path;
+        // 2. Handle upload gambar utama baru
+        if ($request->hasFile('primary_image')) {
+            // Hapus gambar lama
+            if ($product->primary_image_path) {
+                 // FIX KRITIS 3: Menggunakan primary_image_path untuk hapus
+                Storage::disk('public')->delete($product->primary_image_path); 
+            }
+            $path = $request->file('primary_image')->store('products', 'public');
+            $validated['primary_image_path'] = $path; // Key sesuai Model
         }
 
-        // Handle additional images on update: menggabungkan path baru dengan yang sudah ada
+        // 3. Handle additional images (Menambahkan path baru)
         if ($request->hasFile('additional_images')) {
-            // Pastikan data yang ada sudah di-cast sebagai array di Model, jika tidak:
-            $existingPaths = $product->additional_images ?? [];
+            // Model cast otomatis me-load array, jadi kita tidak perlu decode
+            $existingPaths = $product->additional_images ?? []; 
+            
+            // Pastikan $existingPaths adalah array (meskipun casts sudah ada)
             if (!is_array($existingPaths)) {
-                 // Jika additional_images disimpan sebagai JSON string di DB
-                $existingPaths = json_decode($existingPaths, true) ?: [];
+                 $existingPaths = json_decode($existingPaths, true) ?: [];
             }
             
             foreach ($request->file('additional_images') as $file) {
@@ -123,10 +130,14 @@ class SellerProductController extends Controller
                     $existingPaths[] = $file->store('products', 'public');
                 }
             }
-            $validated['additional_images'] = json_encode($existingPaths); 
+            // FIX KRITIS 4: Hapus json_encode()
+            $validated['additional_images'] = $existingPaths; 
+        } else {
+            // JANGAN hapus data lama jika tidak ada upload baru
+            unset($validated['additional_images']);
         }
 
-        // Update produk
+        // 4. Update produk
         $product->update($validated);
 
         return redirect()->route('seller.products.show', $product->id)
@@ -135,9 +146,18 @@ class SellerProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // OPTIONAL: Tambahkan logika untuk menghapus file gambar dari storage saat produk dihapus
-        // $product->additional_images (loop dan hapus)
-        // Storage::disk('public')->delete($product->primary_images);
+        // Menghapus gambar utama
+        if ($product->primary_image_path) {
+            // FIX KRITIS 5: Menggunakan primary_image_path untuk hapus
+            Storage::disk('public')->delete($product->primary_image_path);
+        }
+        
+        // Menghapus gambar tambahan
+        if (is_array($product->additional_images)) {
+            foreach ($product->additional_images as $path) {
+                Storage::disk('public')->delete($path);
+            }
+        }
         
         $product->delete();
 

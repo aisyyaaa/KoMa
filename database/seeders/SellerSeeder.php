@@ -1,65 +1,142 @@
-<?php 
-// File: database/migrations/YYYY_MM_DD_HHMMSS_create_sellers_table.php
+<?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace Database\Seeders;
 
-return new class extends Migration
+use App\Models\Seller;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+class SellerSeeder extends Seeder
 {
     /**
-     * Jalankan migrasi (membuat tabel).
+     * Run the database seeds.
      */
-    public function up(): void
+    public function run(): void
     {
-        Schema::create('sellers', function (Blueprint $table) {
-            $table->id();
-            
-            // --- DATA TOKO (SRS-MartPlace-01: Elemen 1 & 2) ---
-            $table->string('store_name')->unique(); // Nama toko
-            $table->string('short_description', 500)->nullable(); // Deskripsi singkat
-            
-            // --- DATA PIC & AKUN (SRS-MartPlace-01: Elemen 3, 4, 5, dan Akun) ---
-            $table->string('pic_name'); // Nama PIC
-            $table->string('phone_number', 15)->unique(); // No Handphone PIC (Kolom DB: phone_number)
-            $table->string('email')->unique(); // Email (Kolom DB: email)
-            $table->string('password');
-            
-            // --- DETAIL ALAMAT PIC (SRS-MartPlace-01: Elemen 6 s/d 11) ---
-            $table->string('address'); // Alamat (nama jalan) PIC
-            $table->string('rt', 5);
-            $table->string('rw', 5);
-            $table->string('village', 100); // Nama kelurahan
-            $table->string('district', 100); // Nama Kecamatan
-            $table->string('city', 100); // Kabupaten/Kota
-            $table->string('province', 100); // Provinsi
-            
-            // --- DOKUMEN PIC (SRS-MartPlace-01: Elemen 12 s/d 14) ---
-            // NIK KTP (Digunakan di Controller sebagai 'no_ktp_pic')
-            $table->string('ktp_number', 20)->unique(); // Kolom DB: ktp_number
-            $table->string('pic_photo_path'); // Path Foto PIC
-            $table->string('ktp_file_path'); // Path File KTP PIC
-            
-            // --- STATUS AKUN & VERIFIKASI (SRS-MartPlace-02) ---
-            // PENTING: Kolom harus bernama 'status' agar controller updateStatus berhasil
-            $table->enum('status', ['PENDING', 'ACTIVE', 'REJECTED'])->default('PENDING'); 
-            
-            // Status Akun Aktif/Tidak Aktif
-            $table->boolean('is_active')->default(false); 
-            
-            // Mencatat tanggal dan waktu pendaftaran
-            $table->timestamp('registration_date')->nullable(); 
+        // REVISI KRITIS: Bersihkan tabel terlebih dahulu untuk menghindari UNIQUE CONSTRAINT errors
+        Seller::truncate(); 
 
-            $table->rememberToken();
-            $table->timestamps(); 
-        });
-    }
+        // Pastikan folder storage/app/public/seller_docs ada
+        if (!Storage::disk('public')->exists('seller_docs')) {
+            Storage::disk('public')->makeDirectory('seller_docs');
+        }
 
-    /**
-     * Batalkan migrasi (menghapus tabel).
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('sellers');
+        // --- Data Seller Uji Coba (6 Total Seller: 3 ACTIVE, 2 PENDING, 1 REJECTED) ---
+
+        // 1. Seller AKTIF - Jawa Tengah (ID 1)
+        Seller::create([
+            'store_name' => 'Toko Buku ABC',
+            'short_description' => 'Menyediakan modul dan buku kuliah terlengkap di Jawa Tengah.',
+            'pic_name' => 'Budi Santoso',
+            'phone_number' => '081234567890',
+            'email' => 'budi.abc@mail.com',
+            'password' => Hash::make('password'),
+            'address' => 'Jl. Merdeka No. 10', 'rt' => '001', 'rw' => '002', 
+            'village' => 'Sukamakmur', 'district' => 'Tembalang', 
+            'city' => 'Semarang', 'province' => 'Jawa Tengah',
+            'ktp_number' => '1122334455667788',
+            'pic_photo_path' => 'seller_docs/pic_budi.jpg', 
+            'ktp_file_path' => 'seller_docs/ktp_budi.pdf',
+            'status' => 'ACTIVE', 
+            'is_active' => true,
+            'registration_date' => now(), 
+        ]);
+        
+        // 2. Seller AKTIF - DIY Yogyakarta (ID 2)
+        Seller::create([
+            'store_name' => 'KoMa Stationery',
+            'short_description' => 'Menjual perlengkapan kos dan alat tulis modern.',
+            'pic_name' => 'Dewi Lestari',
+            'phone_number' => '085000111222',
+            'email' => 'dewi.koma@mail.com',
+            'password' => Hash::make('password'),
+            'address' => 'Jl. Pelajar No. 5', 'rt' => '003', 'rw' => '001', 
+            'village' => 'Kampus Baru', 'district' => 'Depok', 
+            'city' => 'Sleman', 'province' => 'DIY Yogyakarta',
+            'ktp_number' => '9988776655443322',
+            'pic_photo_path' => 'seller_docs/pic_dewi.jpg',
+            'ktp_file_path' => 'seller_docs/ktp_dewi.pdf',
+            'status' => 'ACTIVE', 
+            'is_active' => true,
+            'registration_date' => now(), 
+        ]);
+
+        // 3. Seller AKTIF - DKI Jakarta (ID 3)
+        Seller::create([
+            'store_name' => 'Grosir Kos Jakarta',
+            'short_description' => 'Grosir kebutuhan dapur dan kebersihan kos.',
+            'pic_name' => 'Fajar Hakim',
+            'phone_number' => '081112223334',
+            'email' => 'fajar.grosir@mail.com',
+            'password' => Hash::make('password'),
+            'address' => 'Jl. Kebon Jeruk No. 8', 'rt' => '004', 'rw' => '005', 
+            'village' => 'Kebon', 'district' => 'Kemayoran', 
+            'city' => 'Jakarta Pusat', 'province' => 'DKI Jakarta',
+            'ktp_number' => '3101010101010101',
+            'pic_photo_path' => 'seller_docs/pic_fajar.jpg',
+            'ktp_file_path' => 'seller_docs/ktp_fajar.pdf',
+            'status' => 'ACTIVE', 
+            'is_active' => true,
+            'registration_date' => now(), 
+        ]);
+
+        // 4. Seller PENDING - Jawa Tengah (ID 4)
+        Seller::create([
+            'store_name' => 'Teknologi Cepat',
+            'short_description' => 'Aksesoris Gadget dan Laptop Murah.',
+            'pic_name' => 'Gina Putri',
+            'phone_number' => '082345678901',
+            'email' => 'gina.tech@mail.com',
+            'password' => Hash::make('password'),
+            'address' => 'Jl. Pahlawan No. 7', 'rt' => '002', 'rw' => '004', 
+            'village' => 'Pekalongan', 'district' => 'Kajen', 
+            'city' => 'Pekalongan', 'province' => 'Jawa Tengah',
+            'ktp_number' => '3333444455556666',
+            'pic_photo_path' => 'seller_docs/pic_gina.jpg',
+            'ktp_file_path' => 'seller_docs/ktp_gina.pdf',
+            'status' => 'PENDING', 
+            'is_active' => false,
+            'registration_date' => now(), 
+        ]);
+
+        // 5. Seller PENDING - Jawa Barat (ID 5)
+        Seller::create([
+            'store_name' => 'Bumdes Hasil Tani',
+            'short_description' => 'Menyediakan makanan dan minuman lokal.',
+            'pic_name' => 'Haris Gunawan',
+            'phone_number' => '087654321098',
+            'email' => 'haris.bumdes@mail.com',
+            'password' => Hash::make('password'),
+            'address' => 'Jl. Desa Cepat No. 1', 'rt' => '001', 'rw' => '001', 
+            'village' => 'Cibiru', 'district' => 'Cileunyi', 
+            'city' => 'Bandung', 'province' => 'Jawa Barat',
+            'ktp_number' => '3210987654321098',
+            'pic_photo_path' => 'seller_docs/pic_haris.jpg',
+            'ktp_file_path' => 'seller_docs/ktp_haris.pdf',
+            'status' => 'PENDING', 
+            'is_active' => false,
+            'registration_date' => now(), 
+        ]);
+
+        // 6. Seller REJECTED - Jawa Barat (ID 6)
+        Seller::create([
+            'store_name' => 'Drop Shipper Abal',
+            'short_description' => 'Menjual barang tanpa stok.',
+            'pic_name' => 'Indra Jaya',
+            'phone_number' => '089911223344',
+            'email' => 'indra.reject@mail.com',
+            'password' => Hash::make('password'),
+            'address' => 'Jl. Raya Bogor No. 1', 'rt' => '005', 'rw' => '005', 
+            'village' => 'Cibinong', 'district' => 'Bogor', 
+            'city' => 'Bogor', 'province' => 'Jawa Barat',
+            'ktp_number' => '3210112233445566',
+            'pic_photo_path' => 'seller_docs/pic_indra.jpg',
+            'ktp_file_path' => 'seller_docs/ktp_indra.pdf',
+            'status' => 'REJECTED', 
+            'is_active' => false,
+            'registration_date' => now(), 
+        ]);
     }
-};
+}

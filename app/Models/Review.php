@@ -9,13 +9,14 @@ class Review extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['product_id', 'visitor_name', 'visitor_phone', 'visitor_email', 'rating', 'comment', 'province', 'reviewed_at'];
+    // HAPUS 'reviewed_at' dari fillable
+    protected $fillable = ['product_id', 'visitor_name', 'visitor_phone', 'visitor_email', 'rating', 'comment', 'province'];
     
     /**
      * Casting atribut ke tipe bawaan.
      */
     protected $casts = [
-        'reviewed_at' => 'datetime', // <-- INI HARUS ADA!
+        // HAPUS 'reviewed_at' dari casts
         'rating' => 'integer',
     ];
 

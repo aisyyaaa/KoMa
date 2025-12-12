@@ -20,9 +20,9 @@ class Product extends Model
         'stock', 'min_stock',
         'sku', 'brand', 'condition', 'warranty',
         'weight', 'length', 'width',
-        'primary_image',
+        // REVISI KRITIS 1: Menggunakan nama kolom DATABASE ASLI: 'primary_image'
+        'primary_image', 
         'additional_images',
-        // Tambahkan rating_average dan is_active jika Anda menggunakannya di seeder/Controller
         'rating_average', 
         'is_active'
     ];
@@ -40,7 +40,6 @@ class Product extends Model
     ];
     
     // Tambahkan accessor URL gambar utama ke Appends
-    // 'average_rating' tidak perlu di appends karena kita menggunakan rating_average dari DB
     protected $appends = ['primary_image_url', 'condition_label']; 
 
     // --- RELATIONS ---
@@ -69,21 +68,21 @@ class Product extends Model
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                $imagePath = $attributes['primary_image'];
+                // REVISI KRITIS 2: Membaca kolom DATABASE ASLI: 'primary_image'
+                $imagePath = $attributes['primary_image'] ?? null; 
                 
                 if (empty($imagePath)) {
-                    // Fallback ke aset default
-                    // Ganti 'images/default_product.png' dengan path default Anda
+                    // Fallback ke aset default jika path kosong
                     return asset('images/default_product.png'); 
                 }
 
-                // Cek jika path sudah berupa URL lengkap
+                // Skenario 1: Path sudah berupa URL lengkap (Seeder)
                 if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
                     return $imagePath;
                 }
 
-                // KOREKSI KRITIS: Hapus blok try-catch yang menyebabkan path ganda
-                // Storage::url() sudah menangani symbolic link
+                // Skenario 2: File Path Lokal (Upload)
+                // Jika storage:link berfungsi, ini HARUS bekerja.
                 return Storage::url($imagePath);
             },
         );
@@ -127,7 +126,4 @@ class Product extends Model
             default => ucfirst($this->condition ?? ''),
         };
     }
-    
-    // Hapus Accessor averageRating() yang lambat.
-    // Gunakan rating_average (kolom DB) atau reviews_avg_rating (dari withAvg) di Controller.
 }

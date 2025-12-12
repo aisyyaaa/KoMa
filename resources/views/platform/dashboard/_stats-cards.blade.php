@@ -1,29 +1,23 @@
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div class="bg-white p-4 rounded shadow">
-        <p class="text-sm text-gray-500">Jumlah Penjual</p>
-        <p id="total-sellers" class="text-2xl font-bold">-</p>
+<div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-gray-500">
+        <p class="text-sm font-medium text-gray-500">Total Penjual</p>
+        <p class="text-3xl font-extrabold text-gray-900 mt-1">{{ $total_sellers ?? '-' }}</p>
     </div>
-    <div class="bg-white p-4 rounded shadow">
-        <p class="text-sm text-gray-500">Penjual Aktif / Tidak Aktif</p>
-        <p class="text-2xl font-bold"><span id="active-sellers">0</span> / <span id="inactive-sellers">0</span></p>
+    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-green-500">
+        <p class="text-sm font-medium text-gray-500">Penjual Aktif</p>
+        <p class="text-3xl font-extrabold text-green-600 mt-1">{{ $active_sellers ?? 0 }}</p>
     </div>
-    <div class="bg-white p-4 rounded shadow">
-        <p class="text-sm text-gray-500">Pengunjung yang memberi komentar / rating</p>
-        <p id="commenters" class="text-2xl font-bold">0</p>
+    {{-- FIX: Tambahkan Penjual Tidak Aktif --}}
+    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-gray-400"> 
+        <p class="text-sm font-medium text-gray-500">Penjual Tidak Aktif</p>
+        <p class="text-3xl font-extrabold text-gray-700 mt-1">{{ $inactive_sellers ?? 0 }}</p>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-red-500">
+        <p class="text-sm font-medium text-gray-500">Menunggu Verifikasi</p>
+        <p class="text-3xl font-extrabold text-red-600 mt-1">{{ $pending_count ?? 0 }}</p>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-koma-primary">
+        <p class="text-sm font-medium text-gray-500">Pengunjung yang Berkomentar</p>
+        <p class="text-3xl font-extrabold text-koma-primary mt-1">{{ $unique_reviewers ?? 0 }}</p>
     </div>
 </div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    if (typeof axios === 'undefined') return;
-    axios.get("{{ route('platform.api.stats') }}").then(res => {
-        const d = res.data || {};
-        document.getElementById('total-sellers').textContent = d.total_sellers ?? '-';
-        document.getElementById('active-sellers').textContent = d.active_sellers ?? 0;
-        document.getElementById('inactive-sellers').textContent = d.inactive_sellers ?? 0;
-        document.getElementById('commenters').textContent = d.commenters ?? 0;
-    }).catch(()=>{});
-});
-</script>
-@endpush

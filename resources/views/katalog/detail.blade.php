@@ -65,7 +65,6 @@
                         alt="{{ $product->name }}" 
                         class="w-full h-auto object-cover rounded-lg shadow-md mb-4"
                     >
-                    {{-- GALERI GAMBAR TAMBAHAN DIHILANGKAN DARI SINI --}}
                 </div>
 
                 {{-- Kolom Tengah: Detail Produk & Harga --}}
@@ -75,8 +74,9 @@
                     {{-- Rating Rata-Rata (SRS-MartPlace-04) --}}
                     <div class="flex items-center mb-4">
                         @php
-                            // PERBAIKAN FATAL: Mengganti method() menjadi properti Accessor
-                            $avgRating = $product->average_rating;
+                            // Mengakses rata-rata rating dari Accessor Model (average_rating) atau Aggregates (reviews_avg_rating)
+                            $avgRating = $product->average_rating ?? $product->reviews_avg_rating ?? 0;
+                            $reviewCount = $product->reviews_count ?? $product->reviews->count();
                             $rating = round($avgRating);
                         @endphp
                         {{-- Bintang Rata-Rata --}}
@@ -84,7 +84,7 @@
                             <svg class="w-6 h-6 {{ $i <= $rating ? 'text-yellow-400' : 'text-gray-300' }} fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.487 7.02l6.56-.955L10 0l2.953 6.065 6.56.955-4.758 4.525 1.123 6.545z"></path></svg>
                         @endfor
                         <span class="ml-2 text-2xl font-bold text-gray-800">{{ number_format($avgRating, 1) }}</span>
-                        <span class="ml-2 text-gray-500">({{ $product->reviews->count() }} ulasan)</span>
+                        <span class="ml-2 text-gray-500">({{ $reviewCount }} ulasan)</span>
                     </div>
 
                     {{-- Harga --}}
@@ -104,7 +104,7 @@
                     {{-- Detail Atribut --}}
                     <h3 class="text-xl font-semibold mt-6 mb-2 border-b pb-1">Detail</h3>
                     <div class="grid grid-cols-2 gap-2 text-sm text-gray-700">
-                        <div><strong class="font-bold">Kondisi:</strong> {{ $product->condition_label }}</div>
+                        <div><strong class="font-bold">Kondisi:</strong> {{ $product->condition_label ?? $product->condition }}</div>
                         <div><strong class="font-bold">Kategori:</strong> {{ $product->category->name ?? 'N/A' }}</div>
                         <div><strong class="font-bold">Stok Tersedia:</strong> {{ number_format($product->stock, 0, ',', '.') }}</div>
                         <div><strong class="font-bold">Merek:</strong> {{ $product->brand ?? 'Tidak ada' }}</div>
@@ -119,7 +119,7 @@
                         <span class="font-bold text-koma-accent">{{ $product->seller->store_name ?? 'Toko Tidak Ditemukan' }}</span>
                     </div>
                     <p class="text-sm text-gray-500 ml-9">
-                        Lokasi: {{ $product->seller->pic_city ?? 'N/A' }}, {{ $product->seller->pic_province ?? 'N/A' }}
+                        Lokasi: {{ $product->seller->city ?? 'N/A' }}, {{ $product->seller->province ?? 'N/A' }}
                     </p>
 
                 </div>
@@ -148,7 +148,6 @@
                         <p class="text-sm text-gray-500 mb-2">
                             Dari <strong>{{ $review->province ?? 'Lokasi Tidak Diketahui' }}</strong> | 
                             <span class="italic text-xs">Tanggal: {{ $review->reviewed_at?->format('d M Y') }}</span>
-                            {{-- Menggunakan nullsafe operator Laravel untuk menghindari optional() --}}
                         </p>
                         
                         <p class="text-gray-700">{{ $review->comment }}</p>
@@ -162,7 +161,8 @@
             <div class="md:col-span-1 bg-koma-bg-light p-6 rounded-xl shadow-lg h-fit sticky top-4">
                 <h3 class="text-xl font-bold mb-4 border-b pb-2">Berikan Ulasan Anda</h3>
 
-                <form id="reviewForm" method="POST" action="{{ route('review.store', $product) }}">
+                {{-- KOREKSI KRITIS 1: Mengubah route action ke nama yang benar --}}
+                <form id="reviewForm" method="POST" action="{{ route('katalog.review.store', $product) }}">
                     @csrf
                     
                     {{-- Input Rating (Skala 1-5) --}}

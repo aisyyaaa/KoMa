@@ -6,9 +6,16 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+// REVISI KRITIS: Import semua Seeder yang akan dipanggil
+use Database\Seeders\SellerSeeder; 
+use Database\Seeders\PlatformUserSeeder;
+use Database\Seeders\CategorySeeder;
+use Database\Seeders\ProductSeeder;
+use Database\Seeders\ReviewSeeder;
+
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents; // Trait dipindahkan ke sini
+    // Hapus use WithoutModelEvents; dari dalam class, karena sudah di-import di atas
 
     /**
      * Seed the application's database.
@@ -18,12 +25,11 @@ class DatabaseSeeder extends Seeder
         // Panggil semua Seeder yang diperlukan untuk mengisi data awal
         $this->call([
             // --- 1. SEEDER OTENTIKASI & PENGGUNA ---
-            // Urutan: Seller -> PlatformUser -> User (jika ada)
+            // Urutan: Seller -> PlatformUser
             SellerSeeder::class,
             PlatformUserSeeder::class, 
             
-            // Tambahkan UserSeeder di sini jika Anda membuatnya:
-            // UserSeeder::class, 
+            // UserSeeder::class, // Jika ada User standar
             
             // --- 2. SEEDER DATA KATALOG ---
             // Urutan: Category -> Product
@@ -32,7 +38,7 @@ class DatabaseSeeder extends Seeder
             
             // --- 3. SEEDER DATA TAMBAHAN ---
             // Review harus di-seed setelah Produk
-            ReviewSeeder::class, // 💡 DITAMBAHKAN
+            ReviewSeeder::class,
         ]);
     }
 }

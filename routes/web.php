@@ -41,8 +41,7 @@ Route::get('/katalog', [CatalogController::class, 'index'])->name('katalog.index
 Route::get('/katalog/autocomplete', [CatalogController::class, 'autocomplete'])->name('katalog.autocomplete');
 Route::get('/katalog/{product:slug}', [CatalogController::class, 'show'])->name('katalog.show'); 
 // Pemberian Komentar dan Rating (SRS-MartPlace-06)
-Route::post('/katalog/{product}/review', [ReviewController::class, 'store'])->name('review.store');
-
+Route::post('/katalog/{product}/review', [ReviewController::class, 'store'])->name('katalog.review.store');
 
 // --- 2. Global Authentication (Login/Logout, Pendaftaran KHUSUS Penjual) ---
 Route::group([], function () {
@@ -83,8 +82,7 @@ Route::prefix('seller/auth')->name('seller.auth.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:seller'])->prefix('seller')->name('seller.')->group(function () {
-    // ... (Rute Dashboard, Produk, Order, Review, Profile tetap sama)
-
+    
     // Dashboard (SRS-MartPlace-08)
     Route::get('dashboard', [SellerDashboardController::class, 'index'])->name('dashboard');
     
@@ -92,8 +90,8 @@ Route::middleware(['auth:seller'])->prefix('seller')->name('seller.')->group(fun
     Route::resource('products', SellerProductController::class);
 
     // Order (Opsional: Jika ada Order Process)
-    Route::get('orders', [\App\Http\Controllers\Seller\SellerOrderController::class, 'index'])->name('orders.index');
-    Route::post('orders/{order}/status', [\App\Http\Controllers\Seller\SellerOrderController::class, 'update'])->name('orders.update');
+    Route::get('orders', [SellerOrderController::class, 'index'])->name('orders.index');
+    Route::post('orders/{order}/status', [SellerOrderController::class, 'update'])->name('orders.update');
 
     // Review/Rating (Melihat Review Produknya)
     Route::get('reviews', [SellerReviewController::class, 'index'])->name('reviews.index');
@@ -128,43 +126,42 @@ Route::middleware(['auth:seller'])->prefix('seller')->name('seller.')->group(fun
 
 /*
 |--------------------------------------------------------------------------
-| Platform Admin Area (SRS-MartPlace-02)
+| Platform Admin Area (TANPA AUTH UNTUK TESTING)
 |--------------------------------------------------------------------------
 */
 Route::prefix('platform')->name('platform.')->group(function () {
 
-    Route::group([], function () {
+    // Dashboard (SRS-MartPlace-07)
+    Route::get('dashboard', [PlatformDashboardController::class, 'index'])->name('dashboard');
+
+    // Verifikasi Penjual (SRS-MartPlace-02)
+    Route::prefix('verifications/sellers')->name('verifications.sellers.')->group(function () {
+        Route::get('', [PlatformSellerVerify::class, 'index'])->name('index');
+        Route::get('{seller}', [PlatformSellerVerify::class, 'show'])->name('show');
+        Route::post('{seller}/approve', [PlatformSellerVerify::class, 'approve'])->name('approve');
+        Route::post('{seller}/reject', [PlatformSellerVerify::class, 'reject'])->name('reject');
         
-        // Dashboard (SRS-MartPlace-07)
-        Route::get('dashboard', [PlatformDashboardController::class, 'index'])->name('dashboard');
+        Route::patch('{seller}/status', [PlatformSellerVerify::class, 'updateStatus'])->name('status'); 
+        Route::post('{seller}/notify', [PlatformSellerVerify::class, 'sendActivationEmail'])->name('notify'); 
+    });
 
-        // Verifikasi Penjual (SRS-MartPlace-02)
-        Route::prefix('verifications/sellers')->name('verifications.sellers.')->group(function () {
-            Route::get('', [PlatformSellerVerify::class, 'index'])->name('index');
-            Route::get('{seller}', [PlatformSellerVerify::class, 'show'])->name('show');
-            Route::post('{seller}/approve', [PlatformSellerVerify::class, 'approve'])->name('approve');
-            Route::post('{seller}/reject', [PlatformSellerVerify::class, 'reject'])->name('reject');
-            
-            // KOREKSI 1: Route PATCH untuk update status dari tabel index
-            Route::patch('{seller}/status', [PlatformSellerVerify::class, 'updateStatus'])->name('status'); 
+    // Laporan (SRS-MartPlace-09, 10, 11)
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('active-sellers', [PlatformReportController::class, 'activeSellers'])->name('active_sellers');
+        Route::get('sellers-by-province', [PlatformReportController::class, 'sellersByProvince'])->name('sellers_by_province');
+        Route::get('products-by-rating', [PlatformReportController::class, 'productsByRating'])->name('products_by_rating');
+        Route::get('export/{type}', [PlatformReportController::class, 'exportPdf'])->name('export');
+    });
 
-            // KOREKSI 2: Route POST untuk Kirim Notifikasi/Aktivasi Email (notify)
-            Route::post('{seller}/notify', [PlatformSellerVerify::class, 'sendActivationEmail'])->name('notify'); 
-        });
-
-        // Laporan (SRS-MartPlace-09, 10, 11)
-        Route::prefix('reports')->name('reports.')->group(function () {
-            Route::get('active-sellers', [PlatformReportController::class, 'activeSellers'])->name('active_sellers');
-            Route::get('sellers-by-province', [PlatformReportController::class, 'sellersByProvince'])->name('sellers_by_province');
-            Route::get('products-by-rating', [PlatformReportController::class, 'productsByRating'])->name('products_by_rating');
-            Route::get('export/{type}', [PlatformReportController::class, 'exportPdf'])->name('export');
-        });
-
-        // Analytics API for charts (SRS-MartPlace-07)
-        Route::prefix('api')->name('api.')->group(function () {
-            Route::get('charts/products-per-category', [PlatformAnalyticsController::class, 'productsPerCategory'])->name('products_per_category');
-            Route::get('charts/sellers-per-province', [PlatformAnalyticsController::class, 'sellersPerProvince'])->name('sellers_per_province');
-            Route::get('stats', [PlatformAnalyticsController::class, 'stats'])->name('stats');
-        });
+    // Analytics API for charts (SRS-MartPlace-07)
+    // FIX KRITIS: Menyederhanakan routing untuk menghindari RouteNotFoundException
+    Route::prefix('api')->name('api.')->group(function () {
+        
+        Route::get('stats', [PlatformAnalyticsController::class, 'stats'])->name('stats'); 
+        
+        // Menggunakan nama rute tunggal untuk memanggil API
+        Route::get('charts/products-per-category', [PlatformAnalyticsController::class, 'productsPerCategory'])->name('products_per_category'); // platform.api.products_per_category
+        Route::get('charts/sellers-per-province', [PlatformAnalyticsController::class, 'sellersPerProvince'])->name('sellers_per_province'); // platform.api.sellers_per_province
+        
     });
 });

@@ -3,42 +3,43 @@
 namespace App\Http\Controllers\Platform;
 
 use App\Http\Controllers\Controller;
+use App\Models\Seller; 
+use App\Models\Product; 
+use App\Models\Review; 
 use Illuminate\Http\Request;
-use App\Models\Seller;
-use App\Models\Product;
-use App\Models\Review;
-// Import yang diperlukan untuk data statistik
-use Illuminate\Support\Facades\DB; 
 
 class PlatformDashboardController extends Controller
 {
-    // HAPUS KONSTRUKTOR BERMASALAH UNTUK MENGHILANGKAN ERROR ROUTE NOT FOUND
-    // public function __construct()
-    // {
-    //     $this->middleware(function ($request, $next) {
-    //         if (!auth()->check() || !auth()->user()->is_platform_admin) {
-    //             return redirect()->route('platform.auth.login'); // BARIS INI MENYEBABKAN ERROR
-    //         }
-    //         return $next($request);
-    //     });
-    // }
-    
+    /**
+     * Menampilkan Dashboard Platform dengan metrik utama (SRS-MartPlace-07).
+     */
     public function index()
     {
-        // gather stats for dashboard (SRS-07)
+        // 1. Ambil Metrik Utama dari Database
         $totalSellers = Seller::count();
         $activeSellers = Seller::where('status', 'ACTIVE')->count();
-        $inactiveSellers = Seller::where('status', 'REJECTED')->count();
+        $pendingSellersCount = Seller::where('status', 'PENDING')->count();
+        
+        // Menghitung Penjual Tidak Aktif (REJECTED atau is_active=false & belum ACTIVE)
+        $inactiveSellers = Seller::where('is_active', false)
+                                 ->where('status', '!=', 'ACTIVE')
+                                 ->count();
+        
         $totalProducts = Product::count();
-        // commenters: unique users who left reviews
-        $commenters = Review::distinct('user_id')->count('user_id');
+        // Menghitung jumlah komentator unik (yang mengisi visitor_email)
+        $uniqueReviewers = Review::distinct('visitor_email')->count('visitor_email'); 
 
-        return view('platform.dashboard.index', [
+        // 2. Kumpulkan data metrik ke dalam satu array
+        $stats = [
             'total_sellers' => $totalSellers,
-            'active' => $activeSellers,
-            'inactive' => $inactiveSellers,
+            'active_sellers' => $activeSellers,
+            'pending_count' => $pendingSellersCount,
+            'inactive_sellers' => $inactiveSellers, // Penjual Tidak Aktif
             'total_products' => $totalProducts,
-            'commenters' => $commenters,
-        ]);
+            'unique_reviewers' => $uniqueReviewers,
+        ];
+        
+        // 3. Kirim data metrik ke View
+        return view('platform.dashboard.index', $stats);
     }
 }

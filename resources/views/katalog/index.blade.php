@@ -19,6 +19,7 @@
 <body class="bg-white text-koma-text-dark">
 
     @php
+        // TIDAK PERLU USE STORAGE DI SINI, CUKUP DI CONTROLLER ATAU PAKAI HELPER Storage::url()
         $showProfileAfterRegister = session('is_registered_flag');
     @endphp
 
@@ -98,11 +99,6 @@
             
             <div class="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
                 
-                @php
-                    // Data Kategori DUMMY/ICON (Menggunakan slug sebagai key)
-                    // Data ini sudah dimap ke Model $category di Controller (method getCategoriesWithIcons)
-                @endphp
-
                 @foreach ($categories as $category)
                     @php
                         // Membuat link filter yang mempertahankan query lain, hanya mengubah kategori
@@ -248,9 +244,10 @@
                         <div class="bg-white border border-koma-bg-light rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
                             
                             {{-- Gambar dan Link ke Detail Produk --}}
-                            <a href="{{ route('katalog.show', $product) }}" class="block h-52 overflow-hidden">
+                            <a href="{{ route('katalog.show', $product->slug) }}" class="block h-52 overflow-hidden">
                                 <img 
-                                    src="{{ $product->primary_image_url ?? 'https://via.placeholder.com/300x200/dde0e7/5d5e62?text=No+Image' }}" 
+                                    {{-- KOREKSI FINAL: Menggunakan Accessor yang benar: primary_image_url --}}
+                                    src="{{ $product->primary_image_url ?? 'https://via.placeholder.com/300x200/dde0e7/5d5e62?text=KoMa+Market' }}" 
                                     alt="{{ $product->name }}" 
                                     class="w-full h-full object-cover hover:scale-105 transition duration-300"
                                 >
@@ -259,7 +256,7 @@
                             <div class="p-3">
                                 {{-- Nama Produk --}}
                                 <h3 class="text-md font-semibold text-koma-text-dark truncate">
-                                    <a href="{{ route('katalog.show', $product) }}" class="hover:text-koma-primary">
+                                    <a href="{{ route('katalog.show', $product->slug) }}" class="hover:text-koma-primary">
                                         {{ $product->name }}
                                     </a>
                                 </h3>
@@ -275,14 +272,19 @@
                                 {{-- Rating Rata-rata (SRS-MartPlace-04) --}}
                                 <div class="flex items-center mt-1">
                                     @php
-                                        $avgRating = $product->average_rating; // Perbaikan: Akses sebagai properti
+                                        // MENGGUNAKAN NAMA FIELD DARI withAvg & withCount di Controller
+                                        $avgRating = $product->reviews_avg_rating ?? $product->rating_average ?? 0; 
+                                        $reviewCount = $product->reviews_count ?? 0;
                                         $rating = round($avgRating);
                                     @endphp
                                     {{-- Tampilkan Bintang --}}
                                     @for ($i = 1; $i <= 5; $i++)
                                         <svg class="w-3 h-3 {{ $i <= $rating ? 'text-yellow-400' : 'text-gray-300' }} fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.487 7.02l6.56-.955L10 0l2.953 6.065 6.56.955-4.758 4.525 1.123 6.545z"></path></svg>
                                     @endfor
-                                    <span class="ml-1 text-xs text-gray-500">({{ number_format($avgRating, 1) }})</span>
+                                    {{-- Tampilkan Nilai Rating dan Jumlah Ulasan --}}
+                                    <span class="ml-1 text-xs text-gray-500">
+                                        ({{ number_format($avgRating, 1) }} | {{ $reviewCount }} ulasan)
+                                    </span>
                                 </div>
                                 
                                 {{-- Nama Toko --}}

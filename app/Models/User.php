@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Casts\Attribute; // Tambahkan untuk Accessor
 
 class User extends Authenticatable
 {
@@ -21,7 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role',
+        // REVISI KRITIS: Mengganti 'role' dengan 'is_platform_admin'
+        'is_platform_admin',
         'province',
     ];
 
@@ -36,11 +38,6 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    /**
      * The attributes that should be cast.
      *
      * @var array<string,string>
@@ -48,21 +45,25 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        // REVISI: Tambahkan casting untuk kolom platform admin
+        'is_platform_admin' => 'boolean', 
     ];
+
+    // --- LOGIC AUTHENTICATION ---
 
     /**
      * Return true when the user is a platform (master admin).
+     * REVISI: Menggunakan kolom is_platform_admin (boolean)
      */
-    public function isPlatform(): bool
+    public function isPlatformAdmin(): bool
     {
-        return $this->role === 'platform' || $this->role === 'admin';
+        return $this->is_platform_admin;
     }
 
-    /**
-     * Return true when the user is an admin.
+    /*
+     * Hapus fungsi isAdmin() karena fungsinya duplikat dengan isPlatformAdmin()
+     * dan kolom 'role' sudah tidak ada di $fillable.
+     * Jika Anda memang ingin mendukung banyak peran, Anda harus menggunakan kolom 'role'
+     * dan menghapus is_platform_admin. Saya berasumsi Anda hanya butuh satu peran: Admin Platform.
      */
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
 }
