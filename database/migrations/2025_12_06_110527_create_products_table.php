@@ -40,18 +40,20 @@ return new class extends Migration
             $table->decimal('width', 8, 2)->nullable();
             $table->integer('warranty')->nullable(); 
             
+            // REVISI KRITIS: Tambahkan kolom pengiriman
+            $table->string('shipment_origin_city', 100)->nullable();
+            $table->decimal('base_shipping_cost', 10, 2)->default(0.00); 
+            
             // Gambar (untuk sinkronisasi dengan Seeder)
             $table->string('primary_image')->nullable();
             $table->json('additional_images')->nullable();
             
-            // --- KOLOM KRITIS YANG DITAMBAHKAN ---
+            // --- KOLOM KRITIS YANG DITAMBAHKAN SEBELUMNYA ---
             
-            // 💡 1. Rating Rata-rata (Perbaikan Error Seeder & SRS-MartPlace-04)
-            // Menggunakan float atau decimal untuk rating 0.0 s/d 5.0
+            // 💡 1. Rating Rata-rata 
             $table->float('rating_average', 3, 1)->default(0.0); 
 
             // 💡 2. Status Produk Aktif
-            // Produk harus aktif (true) agar tampil di katalog.
             $table->boolean('is_active')->default(true); 
             
             // ----------------------------------------

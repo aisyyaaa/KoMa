@@ -41,8 +41,7 @@ class PlatformAnalyticsController extends Controller
     {
         // Menggunakan kolom 'province' (sesuai migrasi Seller)
         $rows = Seller::select('province', DB::raw('count(*) as total'))
-            // REVISI KRITIS: BARIS INI DIHAPUS agar menghitung semua penjual (ACTIVE, PENDING, REJECTED)
-            // ->where('status', 'ACTIVE') 
+            // Menghitung semua penjual (ACTIVE, PENDING, REJECTED)
             ->groupBy('province')
             ->whereNotNull('province') 
             ->where('province', '!=', '') 
@@ -53,7 +52,7 @@ class PlatformAnalyticsController extends Controller
             'labels' => $rows->pluck('province'),
             'datasets' => [ 
                 [
-                    'label' => 'Total Jumlah Toko (Aktif, Tidak Aktif)', // Label diubah
+                    'label' => 'Total Jumlah Toko (Aktif, Tidak Aktif)', 
                     'data' => $rows->pluck('total'),
                 ]
             ]
@@ -68,24 +67,21 @@ class PlatformAnalyticsController extends Controller
         // Statistik Penjual
         $total = Seller::count();
         $active = Seller::where('status', 'ACTIVE')->count();
-        $rejected = Seller::where('status', 'REJECTED')->count();
-        $pending = Seller::where('status', 'PENDING')->count();
         
-        // Penjual Tidak Aktif = Rejected + Pending (yang is_active=false)
+        // Penjual Tidak Aktif (sesuai permintaan SRS-07: Penjual aktif dan tidak aktif)
+        // Dihitung sebagai semua seller yang TIDAK ACTIVE (meliputi Pending dan Rejected)
         $inactive = Seller::where('is_active', false)
-                         ->whereNotIn('status', ['ACTIVE'])
-                         ->count();
+                          ->whereNotIn('status', ['ACTIVE'])
+                          ->count();
         
-        // Komentator unik
+        // Komentator unik (sesuai permintaan SRS-07)
         $commenters = Review::distinct('visitor_email')->count('visitor_email'); 
 
         return response()->json([
-            // Output ini digunakan oleh platform.dashboard.index jika memanggil AJAX
+            // Output ini sesuai dengan permintaan SRS-MartPlace-07
             'total_sellers' => $total,
             'active_sellers' => $active,
             'inactive_sellers' => $inactive, 
-            'rejected_sellers' => $rejected, // Tambahkan rejected untuk display di card
-            'pending_sellers' => $pending, // Tambahkan pending untuk display di card
             'commenters' => $commenters,
         ]);
     }

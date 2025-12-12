@@ -14,7 +14,6 @@ class CategorySeeder extends Seeder
         
         $categories = [
             // REVISI KRITIS 2: Mengubah slug agar sesuai dengan yang dicari ProductSeeder
-            // (Diasumsikan ProductSeeder mencari slug pendek: 'alat-tulis-kuliah', 'kebutuhan-kos', 'buku-modul')
             
             ['name' => 'Alat Tulis & Kuliah', 'slug' => 'alat-tulis-kuliah'],
             // Sinkronisasi: dari 'kebutuhan-kos-asrama' menjadi 'kebutuhan-kos'
@@ -23,7 +22,9 @@ class CategorySeeder extends Seeder
             ['name' => 'Buku, Modul, Skripsi', 'slug' => 'buku-modul'], 
             
             ['name' => 'Aksesoris Gadget', 'slug' => 'aksesoris-gadget'],
-            ['name' => 'Makanan & Minuman Instan', 'slug' => 'makanan-minuman-instan'],
+            
+            // REVISI KRITIS 3: Mempersingkat nama kategori agar tidak merusak layout grid
+            ['name' => 'Makanan Instan', 'slug' => 'makanan-minuman-instan'], 
         ];
 
         foreach ($categories as $category) {
