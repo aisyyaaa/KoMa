@@ -22,21 +22,34 @@ class PlatformReportController extends Controller
      */
     public function activeSellers()
     {
-        // ... (Logika SRS-09 tidak diubah) ...
         $active = Seller::where('status', 'ACTIVE')->count();
-        $inactive = Seller::where('status', 'REJECTED')->count();
+        $inactive = Seller::whereNotIn('status', ['ACTIVE'])->count();
         $total = $active + $inactive;
 
-        $sellers = Seller::select('id', 'store_name', 'pic_name', 'pic_email', 'pic_phone', 'status', 'updated_at')
+        $sellers = Seller::select('id', 'store_name', 'pic_name', 'email', 'phone_number', 'status', 'updated_at', 'registration_date')
             ->withCount('products')
+            // FIX KRITIS: Menggunakan CASE untuk kompatibilitas SQLite/Urutan status (ACTIVE, REJECTED, PENDING)
+            ->orderByRaw("CASE 
+                            WHEN status = 'ACTIVE' THEN 1 
+                            WHEN status = 'REJECTED' THEN 2 
+                            WHEN status = 'PENDING' THEN 3 
+                            ELSE 4 
+                          END") 
             ->orderBy('store_name')
             ->get()
             ->map(function ($s) {
-                if (strtoupper($s->status) !== 'ACTIVE') {
-                    $s->last_active = now()->subMonth();
-                } else {
+                if (strtoupper($s->status) === 'ACTIVE') {
+                    $s->is_active_status = 'Aktif';
                     $s->last_active = $s->updated_at;
+                } else if (strtoupper($s->status) === 'REJECTED') {
+                    $s->is_active_status = 'Tidak Aktif (Ditolak)';
+                    $s->last_active = null;
+                } else {
+                    $s->is_active_status = 'Menunggu Verifikasi';
+                    $s->last_active = $s->registration_date;
                 }
+                $s->pic_phone = $s->phone_number; 
+                $s->pic_email = $s->email;
                 return $s;
             });
 
@@ -45,15 +58,38 @@ class PlatformReportController extends Controller
 
     /**
      * Laporan Penjual Berdasarkan Provinsi (SRS-MartPlace-10)
+     * Mengambil daftar rinci SEMUA penjual dan mengelompokkannya berdasarkan provinsi.
      */
     public function sellersByProvince()
     {
-        // ... (Logika SRS-10 tidak diubah) ...
-        $byProvince = Seller::select('pic_province', \DB::raw('count(*) as total'))
-            ->groupBy('pic_province')
-            ->orderByDesc('total')
+        // Query Sub-Select untuk menghitung total seller per provinsi
+        $subQuery = Seller::select('province', DB::raw('count(*) as count_province'))
+                         ->groupBy('province');
+
+        // 1. Ambil data rinci SEMUA penjual (Aktif, Pending, Reject)
+        $allSellers = Seller::select('sellers.store_name', 'sellers.pic_name', 'sellers.province', 'sellers.status')
+            // Join dengan sub-query untuk mendapatkan jumlah seller per provinsi
+            ->leftJoin(DB::raw('(' . $subQuery->toSql() . ') as sub'), 'sellers.province', '=', 'sub.province')
+            ->mergeBindings($subQuery->getQuery()) // Penting untuk binding SQLITE
+            
+            // REVISI KRITIS: Urutkan berdasarkan Jumlah Seller (DESC)
+            ->orderBy('sub.count_province', 'desc') 
+            ->orderBy('sellers.province') // Urutan kedua: Abjad Provinsi (A-Z)
+            ->orderBy('sellers.store_name')
             ->get();
-        return view('platform.reports.sellers_by_province', compact('byProvince'));
+            
+        // 2. Kelompokkan data untuk View HTML (Tabular) dan Ringkasan
+        $groupedSellers = $allSellers->groupBy('province');
+
+        // Untuk tampilan ringkas (ringkasan total di View HTML)
+        $byProvince = $allSellers->groupBy('province')->map(function ($group) {
+            $province = $group->first()->province ?? 'Tidak Diketahui';
+            return (object)['total' => $group->count(), 'province' => $province];
+        })->sortByDesc('total');
+
+        // Mengirim daftar datar ($allSellers) untuk tabel rincian di View HTML, 
+        // dan $byProvince untuk ringkasan. $groupedSellers dikirim untuk kompatibilitas.
+        return view('platform.reports.sellers_by_province', compact('allSellers', 'byProvince', 'groupedSellers'));
     }
 
     /**
@@ -61,7 +97,6 @@ class PlatformReportController extends Controller
      */
     public function productsByRating()
     {
-        // ... (Logika SRS-11 View HTML tidak diubah) ...
         $products = Product::with(['seller', 'category']) 
             ->withAvg('reviews', 'rating') 
             ->orderByDesc('reviews_avg_rating') 
@@ -79,39 +114,68 @@ class PlatformReportController extends Controller
         $view = '';
         $filename = '';
 
-        $pemroses = User::where('role', 'platform')->first(); 
+        $pemroses = Auth::user() ?? User::where('role', 'platform')->first(); 
         $data['pemroses'] = $pemroses;
         $data['date'] = now()->format('d-m-Y');
+
+        // Mendefinisikan Query Order By Count untuk digunakan di Export PDF
+        $subQuery = Seller::select('province', DB::raw('count(*) as count_province'))
+                         ->groupBy('province');
 
         try {
             if ($type === 'seller-accounts') {
                 $data['active'] = Seller::where('status', 'ACTIVE')->count();
-                $data['inactive'] = Seller::where('status', 'REJECTED')->count();
-                $data['sellers'] = Seller::select('store_name', 'pic_name', 'pic_email', 'pic_phone', 'status', 'updated_at')
-                    ->withCount('products')->orderBy('store_name')->get();
-                // Mengubah path view: platform.reports.pdf.seller-accounts-pdf
+                $data['inactive'] = Seller::whereNotIn('status', ['ACTIVE'])->count();
+
+                $data['sellers'] = Seller::select('store_name', 'pic_name', 'email', 'phone_number', 'status', 'updated_at', 'registration_date')
+                    ->withCount('products')
+                    // FIX KRITIS: Terapkan CASE expression di exportPdf untuk sorting
+                    ->orderByRaw("CASE 
+                                    WHEN status = 'ACTIVE' THEN 1 
+                                    WHEN status = 'REJECTED' THEN 2 
+                                    WHEN status = 'PENDING' THEN 3 
+                                    ELSE 4 
+                                  END") 
+                    ->orderBy('store_name')
+                    ->get()
+                    ->map(function ($s) {
+                        $s->is_active_status = (strtoupper($s->status) === 'ACTIVE') ? 'Aktif' : 'Tidak Aktif';
+                        $s->last_active = (strtoupper($s->status) === 'ACTIVE') ? $s->updated_at : $s->registration_date;
+                        $s->pic_phone = $s->phone_number; 
+                        $s->pic_email = $s->email;
+                        return $s;
+                    });
+
                 $view = 'platform.reports.pdf.seller_accounts_pdf'; 
-                $filename = 'seller-accounts.pdf';
+                $filename = 'seller-accounts-' . $data['date'] . '.pdf'; 
+
             } elseif ($type === 'seller-locations') {
-                $data['byProvince'] = Seller::select('pic_province', \DB::raw('count(*) as total'))
-                    ->groupBy('pic_province')->orderByDesc('total')->get();
-                // Mengubah path view: platform.reports.pdf.seller-locations-pdf
+                // Ambil data rinci SEMUA SELLER (Aktif, Pending, Reject)
+                $allSellers = Seller::select('sellers.store_name', 'sellers.pic_name', 'sellers.province', 'sellers.status')
+                    ->leftJoin(DB::raw('(' . $subQuery->toSql() . ') as sub'), 'sellers.province', '=', 'sub.province')
+                    ->mergeBindings($subQuery->getQuery()) // Penting untuk binding SQLITE
+                    
+                    // REVISI KRITIS: Urutkan berdasarkan Jumlah Seller (DESC)
+                    ->orderBy('sub.count_province', 'desc') 
+                    ->orderBy('sellers.province') // Urutan kedua: Abjad Provinsi (A-Z)
+                    ->orderBy('sellers.store_name')
+                    ->get();
+                
+                // Mengirim data yang dikelompokkan untuk PDF (untuk grouping di PDF view)
+                $data['groupedSellers'] = $allSellers->groupBy('province'); 
+                
                 $view = 'platform.reports.pdf.seller_locations_pdf'; 
-                $filename = 'seller-locations.pdf';
+                $filename = 'seller-locations-' . $data['date'] . '.pdf';
+
             } elseif ($type === 'products_by_rating') { // SRS-11
                 $data['products'] = Product::with(['seller', 'category'])
                     ->withAvg('reviews', 'rating')->orderByDesc('reviews_avg_rating')->get();
-
-                // PERUBAHAN KRITIS SRS-11: Mengubah path view untuk menghindari konflik
-                // Hati-hati dengan tanda hubung, gunakan underscore:
                 $view = 'platform.reports.pdf.products_by_rating'; 
-                $filename = 'product-ratings.pdf';
-                
+                $filename = 'product-ratings-' . $data['date'] . '.pdf';
             } else {
                 return back()->with('error', 'Tipe laporan tidak dikenal: ' . $type);
             }
 
-            // ... (Kode DomPDF tetap sama) ...
             $pdfAvailable = class_exists(Pdf::class);
             if (!$pdfAvailable) {
                 return redirect()->back()->with('error', 'PDF export requires package "barryvdh/laravel-dompdf".');
@@ -130,8 +194,8 @@ class PlatformReportController extends Controller
             return $pdf->download($filename);
             
         } catch (\Exception $e) {
-            // MENGEMBALIKAN ERROR LENGKAP AGAR KITA BISA LIHAT ROOT EXCEPTIONNYA
-            return back()->with('error', 'Terjadi kesalahan saat membuat PDF: ' . $e->getMessage());
+            Log::error("PDF Export Error: " . $e->getMessage() . " on file " . $e->getFile() . " line " . $e->getLine());
+            return back()->with('error', 'Terjadi kesalahan saat membuat PDF: ' . $e->getMessage() . ' (Cek log untuk detail).');
         }
     }
 }

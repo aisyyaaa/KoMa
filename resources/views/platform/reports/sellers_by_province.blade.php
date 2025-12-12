@@ -9,21 +9,9 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <div class="flex items-center space-x-4">
-                <h1 class="text-2xl font-bold text-gray-800">Laporan Penjual Lokasi</h1>
-                <div class="relative">
-                    <select onchange="window.location.href=this.value" class="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500">
-                        <option value="{{ route('platform.reports.active_sellers') }}">Laporan Penjual Aktif</option>
-                        <option value="{{ route('platform.reports.sellers_by_province') }}" selected>Laporan Penjual Lokasi</option>
-                        <option value="{{ route('platform.reports.products_by_rating') }}">Laporan Daftar Produk</option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                        </svg>
-                    </div>
-                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Laporan Daftar Toko Berdasarkan Lokasi Provinsi (SRS-10)</h1>
             </div>
-            <p class="text-sm text-gray-500 mt-1">Daftar penjual (toko) untuk setiap lokasi provinsi.</p>
+            <p class="text-sm text-gray-500 mt-1">Daftar rinci penjual (toko) untuk setiap lokasi provinsi (termasuk Aktif dan Tidak Aktif).</p>
         </div>
           <a href="{{ route('platform.reports.export', 'seller-locations') }}" target="_blank" rel="noopener noreferrer"
               class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150">
@@ -32,8 +20,9 @@
         </a>
     </div>
 
-    {{-- REPORT TABLE --}}
-    <div class="bg-white rounded-lg shadow overflow-x-auto">
+    {{-- 1. RINGKASAN AGREGAT (Persentase Per Provinsi) --}}
+    <h2 class="text-lg font-semibold text-gray-800 mb-3">Ringkasan Total Penjual per Provinsi</h2>
+    <div class="bg-white rounded-lg shadow overflow-x-auto mb-8">
         <table class="w-full min-w-full">
             <thead class="bg-gray-50">
                 <tr>
@@ -47,9 +36,10 @@
                 @php $total = $byProvince->sum('total'); @endphp
                 @forelse($byProvince->sortByDesc('total') as $index => $item)
                 <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $index + 1 }}</td>
+                    {{-- FIX: Menggunakan (int) $index untuk memaksa tipe data integer (mengatasi TypeError) --}}
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ (int) $index + 1 }}</td> 
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="text-sm font-medium text-gray-900">{{ $item->pic_province ?: 'Tidak Diketahui' }}</span>
+                        <span class="text-sm font-medium text-gray-900">{{ $item->province ?: 'Tidak Diketahui' }}</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{{ $item->total }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $total > 0 ? round(($item->total / $total) * 100, 1) : 0 }}%</td>
@@ -57,7 +47,7 @@
                 @empty
                 <tr>
                     <td colspan="4" class="text-center py-12">
-                        <h3 class="text-sm font-medium text-gray-900">Tidak ada data penjual untuk ditampilkan.</h3>
+                        <h3 class="text-sm font-medium text-gray-900">Tidak ada data ringkasan penjual untuk ditampilkan.</h3>
                     </td>
                 </tr>
                 @endforelse
@@ -68,6 +58,45 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">100%</td>
                 </tr>
                 @endif
+            </tbody>
+        </table>
+    </div>
+
+    {{-- 2. DAFTAR RINCI (SATU TABEL BESAR SESUAI SRS-10) --}}
+    <h2 class="text-lg font-semibold text-gray-800 mb-3 mt-10">Daftar Rinci Toko (Diurutkan berdasarkan Provinsi)</h2>
+    
+    <div class="bg-white rounded-lg shadow overflow-x-auto">
+        <table class="w-full min-w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" style="width: 5%;" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                    <th scope="col" style="width: 30%;" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Toko</th>
+                    <th scope="col" style="width: 30%;" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama PIC</th>
+                    <th scope="col" style="width: 20%;" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provinsi</th>
+                    <th scope="col" style="width: 15%;" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {{-- REVISI KRITIS: Meratakan koleksi ganda ($groupedSellers) untuk iterasi satu tabel besar --}}
+                @php $flatSellers = $groupedSellers->flatten()->sortBy('province'); @endphp 
+                @forelse($flatSellers as $i => $seller) 
+                <tr>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900 text-center">{{ $i + 1 }}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{{ $seller->store_name }}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{{ $seller->pic_name }}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-900">{{ $seller->province }}</td>
+                    <td class="px-3 py-2 whitespace-nowrap text-sm">
+                        {{-- Menampilkan Status (Aktif, Pending, Rejected) --}}
+                        <span class="font-semibold @if($seller->status === 'ACTIVE') text-green-600 @elseif($seller->status === 'PENDING') text-yellow-600 @else text-red-600 @endif">
+                            {{ $seller->status }}
+                        </span>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="5" class="text-center py-12 text-sm text-gray-500">Tidak ada penjual yang terdaftar.</td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

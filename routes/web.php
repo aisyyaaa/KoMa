@@ -22,6 +22,8 @@ use App\Http\Controllers\Platform\PlatformDashboardController;
 use App\Http\Controllers\Platform\PlatformAnalyticsController; 
 use App\Http\Controllers\Platform\PlatformReportController; 
 use App\Http\Controllers\Platform\SellerVerificationController as PlatformSellerVerify;
+use App\Http\Controllers\Platform\PlatformSellerController; 
+use App\Http\Controllers\Platform\PlatformCategoryController; 
 
 // --- LARAVEL FACADES ---
 use Illuminate\Support\Facades\Route;
@@ -130,9 +132,21 @@ Route::middleware(['auth:seller'])->prefix('seller')->name('seller.')->group(fun
 |--------------------------------------------------------------------------
 */
 Route::prefix('platform')->name('platform.')->group(function () {
+    
+    // --- AUTHENTICATION PLATFORM (Logout) ---
+    Route::post('logout', function (Request $request) {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('login');
+    })->name('auth.logout'); 
 
     // Dashboard (SRS-MartPlace-07)
     Route::get('dashboard', [PlatformDashboardController::class, 'index'])->name('dashboard');
+
+    // --- DAFTAR PENJUAL & KATEGORI ---
+    Route::get('sellers', [PlatformSellerController::class, 'index'])->name('sellers.index');
+    Route::get('categories', [PlatformCategoryController::class, 'index'])->name('categories.index');
 
     // Verifikasi Penjual (SRS-MartPlace-02)
     Route::prefix('verifications/sellers')->name('verifications.sellers.')->group(function () {
@@ -154,14 +168,9 @@ Route::prefix('platform')->name('platform.')->group(function () {
     });
 
     // Analytics API for charts (SRS-MartPlace-07)
-    // FIX KRITIS: Menyederhanakan routing untuk menghindari RouteNotFoundException
     Route::prefix('api')->name('api.')->group(function () {
-        
         Route::get('stats', [PlatformAnalyticsController::class, 'stats'])->name('stats'); 
-        
-        // Menggunakan nama rute tunggal untuk memanggil API
-        Route::get('charts/products-per-category', [PlatformAnalyticsController::class, 'productsPerCategory'])->name('products_per_category'); // platform.api.products_per_category
-        Route::get('charts/sellers-per-province', [PlatformAnalyticsController::class, 'sellersPerProvince'])->name('sellers_per_province'); // platform.api.sellers_per_province
-        
+        Route::get('charts/products-per-category', [PlatformAnalyticsController::class, 'productsPerCategory'])->name('products_per_category');
+        Route::get('charts/sellers-per-province', [PlatformAnalyticsController::class, 'sellersPerProvince'])->name('sellers_per_province');
     });
 });

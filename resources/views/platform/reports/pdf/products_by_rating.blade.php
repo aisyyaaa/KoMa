@@ -5,7 +5,8 @@
     <title>Laporan Daftar Produk Berdasarkan Rating (Platform)</title>
     {{-- Gaya CSS in-line agar DomPDF dapat merender dengan benar --}}
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 0; font-size: 9pt; }
+        /* Menggunakan font yang kompatibel dengan DomPDF untuk karakter non-Latin (DejaVu Sans) */
+        body { font-family: DejaVu Sans, sans-serif; margin: 0; padding: 0; font-size: 9pt; }
         .header { margin-bottom: 15px; }
         .header .srs { font-size: 10pt; margin-bottom: 5px; font-weight: bold; }
         .header h1 { font-size: 14pt; margin: 0 0 5px 0; font-weight: bold; }
@@ -33,19 +34,20 @@
         <thead>
             <tr>
                 <th style="width: 5%;">No</th>
-                <th style="width: 15%;">Produk</th>
+                {{-- Nama Kolom disinkronkan dengan mockup SRS-11 --}}
+                <th style="width: 25%;">Produk</th>
                 <th style="width: 15%;">Kategori</th>
                 <th style="width: 12%;">Harga</th>
                 <th style="width: 12%;">Rating</th>
                 <th style="width: 20%;">Nama Toko</th>
-                <th style="width: 15%;">Propinsi</th>
+                <th style="width: 11%;">Propinsi</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($products as $i => $p)
                 <tr>
                     <td class="center">{{ $i + 1 }}</td>
-                    <td>{{ $p->name }}</td>
+                    <td>{{ $p->name ?? 'XXXXXX' }}</td>
                     {{-- Kategori --}}
                     <td>{{ $p->category->name ?? 'XXXXXX' }}</td>
                     {{-- Harga --}}
@@ -56,8 +58,8 @@
                     </td>
                     {{-- Nama Toko --}}
                     <td>{{ $p->seller->store_name ?? 'XXXXXX XXXXXX' }}</td> 
-                    {{-- Provinsi Toko --}}
-                    <td>{{ $p->seller->pic_province ?? 'Propinsi' }}</td>
+                    {{-- Provinsi Toko (Karena data provinsi pemberi rating tidak diambil di Controller) --}}
+                    <td>{{ $p->seller->province ?? 'Propinsi' }}</td>
                 </tr>
             @empty
                 <tr>
