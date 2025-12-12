@@ -54,8 +54,8 @@ class SellerProductController extends Controller
         // 2. Handle upload gambar utama
         if ($request->hasFile('primary_image')) {
             $path = $request->file('primary_image')->store('products', 'public');
-            // FIX KRITIS 1: Menggunakan primary_image_path (sesuai Model Accessor/DB)
-            $validated['primary_image_path'] = $path; 
+            // Simpan ke kolom yang sesuai di DB (`primary_image`)
+            $validated['primary_image'] = $path; 
         }
 
         // 3. Handle gambar tambahan
@@ -89,6 +89,32 @@ class SellerProductController extends Controller
         return view('seller.products.show', ['product'=> $product]);
     }
 
+    /**
+     * Detail view that uses a fixed path `/seller/products/detail`.
+     * Expects an `id` query parameter: /seller/products/detail?id=123
+     */
+    public function detail(Request $request)
+    {
+        $sellerId = auth()->id() ?? 1;
+        $id = $request->query('id');
+        $slug = $request->query('slug');
+
+        // Try to resolve by id first, then fallback to slug.
+        if ($id) {
+            $product = Product::where('seller_id', $sellerId)->with(['category', 'reviews'])->find($id);
+        } elseif ($slug) {
+            $product = Product::where('seller_id', $sellerId)->where('slug', $slug)->with(['category', 'reviews'])->first();
+        } else {
+            abort(404);
+        }
+
+        if (!$product) {
+            abort(404);
+        }
+
+        return view('seller.products.show', ['product' => $product]);
+    }
+
     public function edit(Product $product)
     {
         $categories = Category::all();
@@ -107,12 +133,11 @@ class SellerProductController extends Controller
         // 2. Handle upload gambar utama baru
         if ($request->hasFile('primary_image')) {
             // Hapus gambar lama
-            if ($product->primary_image_path) {
-                 // FIX KRITIS 3: Menggunakan primary_image_path untuk hapus
-                Storage::disk('public')->delete($product->primary_image_path); 
+            if ($product->primary_image) {
+                Storage::disk('public')->delete($product->primary_image); 
             }
             $path = $request->file('primary_image')->store('products', 'public');
-            $validated['primary_image_path'] = $path; // Key sesuai Model
+            $validated['primary_image'] = $path; // Key sesuai Model
         }
 
         // 3. Handle additional images (Menambahkan path baru)
@@ -140,16 +165,15 @@ class SellerProductController extends Controller
         // 4. Update produk
         $product->update($validated);
 
-        return redirect()->route('seller.products.show', $product->id)
-                         ->with('success', 'Produk berhasil diupdate');
+        return redirect()->route('seller.products.detail', ['id' => $product->id])
+                 ->with('success', 'Produk berhasil diupdate');
     }
 
     public function destroy(Product $product)
     {
         // Menghapus gambar utama
-        if ($product->primary_image_path) {
-            // FIX KRITIS 5: Menggunakan primary_image_path untuk hapus
-            Storage::disk('public')->delete($product->primary_image_path);
+        if ($product->primary_image) {
+            Storage::disk('public')->delete($product->primary_image);
         }
         
         // Menghapus gambar tambahan

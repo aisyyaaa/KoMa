@@ -95,7 +95,7 @@
                         <div class="space-y-6">
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900 mb-2">Deskripsi</h3>
-                                <p class="text-gray-600 leading-relaxed whitespace-pre-wrap">
+                                <p class="text-gray-600 leading-relaxed whitespace-pre-wrap text-left">
                                     {{ $product->description }}
                                 </p>
                             </div>

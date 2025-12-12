@@ -87,11 +87,13 @@ Route::middleware(['auth:seller'])->prefix('seller')->name('seller.')->group(fun
     Route::get('dashboard', [SellerDashboardController::class, 'index'])->name('dashboard');
     
     // Produk (SRS-MartPlace-03)
+    // Tambahkan route statis untuk halaman detail (menggunakan query param `id`) sehingga path
+    // menjadi /seller/products/detail?id=123 dan bukan /seller/products/{id}
+    Route::get('products/detail', [SellerProductController::class, 'detail'])->name('products.detail');
+
     Route::resource('products', SellerProductController::class);
 
-    // Order (Opsional: Jika ada Order Process)
-    Route::get('orders', [SellerOrderController::class, 'index'])->name('orders.index');
-    Route::post('orders/{order}/status', [SellerOrderController::class, 'update'])->name('orders.update');
+    
 
     // Review/Rating (Melihat Review Produknya)
     Route::get('reviews', [SellerReviewController::class, 'index'])->name('reviews.index');

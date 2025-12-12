@@ -29,7 +29,7 @@ class ProductRequest extends FormRequest
             'weight' => ['nullable', 'numeric', 'min:0'],
             'length' => ['nullable', 'numeric', 'min:0'],
             'width' => ['nullable', 'numeric', 'min:0'],
-            'primary_images' => ['nullable', 'file', 'image', 'mimes:jpg,png', 'max:5120'],
+            'primary_image' => ['nullable', 'file', 'image', 'mimes:jpg,png', 'max:5120'],
             'additional_images' => ['nullable', 'array'],
             'additional_images.*' => ['nullable', 'file', 'image', 'mimes:jpg,png', 'max:5120'],
         ];

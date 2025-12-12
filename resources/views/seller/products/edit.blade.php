@@ -135,14 +135,14 @@
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ $product->primary_image_url ? 'Ganti Foto Utama' : 'Upload Foto Utama *' }}</label>
                 <div id="primary-image-dropzone" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-koma-primary hover:bg-gray-50 transition duration-150">
-                    <input type="file" name="primary_images" accept="image/*" class="hidden" id="primary-image-edit">
+                    <input type="file" name="primary_image" accept="image/*" class="hidden" id="primary-image-edit">
                     <label for="primary-image-edit" class="cursor-pointer block">
                         <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         <p id="primary-image-text" class="text-gray-600 font-medium">Klik atau drag gambar ke sini</p>
                         <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG (Maks 5MB)</p>
                     </label>
                 </div>
-                @error('primary_images')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+                @error('primary_image')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
             </div>
 
             {{-- ADDITIONAL IMAGES --}}
@@ -216,7 +216,7 @@
 
         {{-- FORM ACTIONS --}}
         <div class="flex items-center justify-end gap-4 pt-4 border-t">
-            <a href="{{ route('seller.products.show', $product->id) }}" class="px-6 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition duration-200 font-medium">
+            <a href="{{ route('seller.products.detail', ['id' => $product->id]) }}" class="px-6 py-2 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition duration-200 font-medium">
                 Batal
             </a>
             <button type="submit" class="inline-flex items-center px-6 py-2 bg-koma-primary text-white rounded-lg hover:bg-koma-danger focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-koma-primary transition duration-200 font-medium">
