@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KoMa Market - {{ $product->name }}</title>
-    @vite('resources/css/app.css')
+    <title>{{ $product->name }} - KoMa Market</title>
+    @vite('resources/css/app.css') 
+    
     <style>
-        /* Gaya untuk Star Rating */
+        /* Gaya untuk Star Rating (tetap sama) */
         .star-rating input { display: none; }
         .star-rating label { font-size: 24px; color: #ccc; cursor: pointer; }
         .star-rating input:checked ~ label,
@@ -14,15 +15,39 @@
         .star-rating label:hover ~ label { color: #ffc107; }
         .star-rating { direction: rtl; }
         /* Gaya untuk tombol disable */
-        .btn-disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        .btn-disabled { opacity: 0.6; cursor: not-allowed; }
+        .field-warning { color: #ef4444; font-size: 0.875rem; margin-top: 0.25rem; }
+        
+        /* FIX KRITIS: Gaya untuk Thumbnail Slider Horizontal */
+        .thumbnail-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding-bottom: 10px; /* Ruang untuk scrollbar */
+            /* Menyembunyikan scrollbar bawaan untuk tampilan yang lebih bersih (opsional) */
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
         }
-        /* Gaya untuk pesan peringatan wajib isi */
-        .field-warning {
-            color: #ef4444; /* Red-500 */
-            font-size: 0.875rem; /* text-sm */
-            margin-top: 0.25rem; /* mt-1 */
+        .thumbnail-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+        .thumbnail-item {
+            flex-shrink: 0; /* Penting agar item tidak mengecil */
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e5e7eb; /* Border abu-abu default */
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .thumbnail-item.active {
+            border-color: #f6ad55; /* Warna aksen aktif (misal: orange/yellow) */
+        }
+        .thumbnail-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
     </style>
 </head>
@@ -58,13 +83,44 @@
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 
-                {{-- Kolom Kiri: Gambar Produk --}}
+                {{-- Kolom Kiri: GAMBAR PRODUK (FIX GALERI THUMBNAIL) --}}
                 <div class="col-span-1">
-                    <img 
-                        src="{{ $product->primary_image_url ?? asset('images/default-product.png') }}" 
-                        alt="{{ $product->name }}" 
-                        class="w-full h-auto object-cover rounded-lg shadow-md mb-4"
-                    >
+                    @php
+                        // Gabungkan Gambar Utama dan Gambar Tambahan
+                        $allImages = array_merge(
+                            [$product->primary_image_url ?? asset('images/default-product.png')], 
+                            $product->additional_image_urls ?? []
+                        );
+                    @endphp
+
+                    {{-- 1. Gambar Utama Besar (Display Gambar yang Aktif) --}}
+                    <div class="relative w-full h-96 mb-3">
+                        <img id="main-product-image"
+                            src="{{ $allImages[0] ?? asset('images/default-product.png') }}" 
+                            alt="{{ $product->name }}" 
+                            class="w-full h-full object-cover rounded-lg shadow-md"
+                        >
+                        
+                        {{-- Badge Kategori --}}
+                        @if($product->category)
+                            <span class="absolute top-3 left-3 bg-koma-primary text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
+                                {{ $product->category->name }}
+                            </span>
+                        @endif
+                    </div>
+
+                    {{-- 2. Thumbnail Slider Horizontal (Jika lebih dari 1 gambar) --}}
+                    @if (count($allImages) > 1)
+                        <div class="thumbnail-container">
+                            @foreach ($allImages as $index => $imageUrl)
+                            <div class="thumbnail-item {{ $index === 0 ? 'active' : '' }}" 
+                                 data-img-url="{{ $imageUrl }}" 
+                                 onclick="changeMainImage(this, '{{ $imageUrl }}')">
+                                <img src="{{ $imageUrl }}" alt="Thumb {{ $index + 1 }}">
+                            </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Kolom Tengah: Detail Produk & Harga --}}
@@ -74,12 +130,10 @@
                     {{-- Rating Rata-Rata (SRS-MartPlace-04) --}}
                     <div class="flex items-center mb-4">
                         @php
-                            // Mengakses rata-rata rating dari Accessor Model (average_rating) atau Aggregates (reviews_avg_rating)
                             $avgRating = $product->average_rating ?? $product->reviews_avg_rating ?? 0;
                             $reviewCount = $product->reviews_count ?? $product->reviews->count();
                             $rating = round($avgRating);
                         @endphp
-                        {{-- Bintang Rata-Rata --}}
                         @for ($i = 1; $i <= 5; $i++)
                             <svg class="w-6 h-6 {{ $i <= $rating ? 'text-yellow-400' : 'text-gray-300' }} fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.487 7.02l6.56-.955L10 0l2.953 6.065 6.56.955-4.758 4.525 1.123 6.545z"></path></svg>
                         @endfor
@@ -96,6 +150,22 @@
                             <p class="text-4xl font-extrabold text-koma-primary">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
                         @endif
                     </div>
+                    
+                    {{-- Informasi Pengiriman --}}
+                    <div class="mb-6 p-4 border rounded-lg">
+                        <h3 class="text-xl font-semibold mb-3 border-b pb-1 text-koma-primary">Pengiriman</h3>
+                        <div class="space-y-2 text-gray-700">
+                            <div class="flex items-center text-sm">
+                                <svg class="w-5 h-5 mr-2 text-koma-primary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
+                                <strong>Dikirim dari:</strong> <span class="ml-2">{{ $product->shipment_origin_city ?? 'Lokasi Tidak Ditetapkan' }}</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <svg class="w-5 h-5 mr-2 text-koma-primary" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M10.496 11.332L9.497 12.569a1 1 0 01-1.424 0l-.295-.316a1 1 0 00-1.424 0l-2.5 2.5a1 1 0 000 1.414l.295.316a1 1 0 010 1.424l-1.5 1.5a1 1 0 000 1.414l.295.316a1 1 0 010 1.424l-2.5 2.5a1 1 0 01-1.414 0l-2.5-2.5a1 1 0 010-1.414l1.5-1.5a1 1 0 000-1.424l-.316-.295a1 1 0 010-1.424l2.5-2.5a1 1 0 001.414 0l.316.295a1 1 0 011.424 0l.999-1.237a1 1 0 00-1.424-1.424z" clip-rule="evenodd"></path></svg>
+                                <strong>Ongkir Dasar:</strong> <span class="ml-2 font-bold">Rp {{ number_format($product->base_shipping_cost ?? 0, 0, ',', '.') }}</span>
+                            </div>
+                        </div>
+                    </div>
+
 
                     {{-- Deskripsi --}}
                     <h3 class="text-xl font-semibold mt-6 mb-2 border-b pb-1">Deskripsi Produk</h3>
@@ -108,7 +178,7 @@
                         <div><strong class="font-bold">Kategori:</strong> {{ $product->category->name ?? 'N/A' }}</div>
                         <div><strong class="font-bold">Stok Tersedia:</strong> {{ number_format($product->stock, 0, ',', '.') }}</div>
                         <div><strong class="font-bold">Merek:</strong> {{ $product->brand ?? 'Tidak ada' }}</div>
-                        <div><strong class="font-bold">Berat:</strong> {{ $product->weight }} kg</div>
+                        <div><strong class="font-bold">Berat:</strong> {{ $product->weight }} gram</div>
                         <div><strong class="font-bold">Garansi:</strong> {{ $product->warranty ? $product->warranty . ' bulan' : 'Tidak ada' }}</div>
                     </div>
 
@@ -134,7 +204,6 @@
             <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-lg">
                 <h2 class="text-2xl font-bold mb-6 border-b pb-2">Ulasan Pembeli ({{ $product->reviews->count() }})</h2>
 
-                {{-- Catatan: Reviews diasumsikan sudah di-Eager Load di Controller --}}
                 @forelse ($product->reviews->sortByDesc('reviewed_at') as $review)
                     <div class="border-b pb-4 mb-4">
                         {{-- Bintang Ulasan --}}
@@ -146,8 +215,7 @@
                         </div>
                         
                         <p class="text-sm text-gray-500 mb-2">
-                            Dari <strong>{{ $review->province ?? 'Lokasi Tidak Diketahui' }}</strong> | 
-                            <span class="italic text-xs">Tanggal: {{ $review->reviewed_at?->format('d M Y') }}</span>
+                            Dari <strong>{{ $review->province ?? 'Lokasi Tidak Diketahui' }}</strong> 
                         </p>
                         
                         <p class="text-gray-700">{{ $review->comment }}</p>
@@ -161,7 +229,6 @@
             <div class="md:col-span-1 bg-koma-bg-light p-6 rounded-xl shadow-lg h-fit sticky top-4">
                 <h3 class="text-xl font-bold mb-4 border-b pb-2">Berikan Ulasan Anda</h3>
 
-                {{-- KOREKSI KRITIS 1: Mengubah route action ke nama yang benar --}}
                 <form id="reviewForm" method="POST" action="{{ route('katalog.review.store', $product) }}">
                     @csrf
                     
@@ -182,8 +249,8 @@
                     <div class="mb-4">
                         <label for="comment" class="block text-gray-700 font-semibold mb-2">Komentar</label>
                         <textarea name="comment" id="comment" rows="3" required
-                                 class="w-full p-2 border rounded-md @error('comment') border-red-500 @enderror"
-                                 placeholder="Tulis ulasan Anda di sini..." oninput="validateForm()">{{ old('comment') }}</textarea>
+                                     class="w-full p-2 border rounded-md @error('comment') border-red-500 @enderror"
+                                     placeholder="Tulis ulasan Anda di sini..." oninput="validateForm()">{{ old('comment') }}</textarea>
                         <p id="commentWarning" class="field-warning" style="display: none;">Komentar wajib diisi.</p>
                         @error('comment') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -258,9 +325,23 @@
         &copy; 2025 KoMa Market. Koperasi Mahasiswa. All Rights Reserved.
     </footer>
 
-    {{-- SCRIPT VALIDASI REAL-TIME --}}
+    {{-- SCRIPT LOGIC GALERI DAN VALIDASI --}}
     <script>
+        // Logika untuk mengubah gambar utama saat thumbnail diklik
+        function changeMainImage(clickedThumb, imageUrl) {
+            const mainImage = document.getElementById('main-product-image');
+            const thumbs = document.querySelectorAll('.thumbnail-item');
+
+            // 1. Update gambar utama
+            mainImage.src = imageUrl;
+
+            // 2. Update kelas aktif pada thumbnail
+            thumbs.forEach(thumb => thumb.classList.remove('active'));
+            clickedThumb.classList.add('active');
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
+            // --- LOGIKA FORM REVIEW (Tetap sama) ---
             const form = document.getElementById('reviewForm');
             const submitButton = document.getElementById('submitButton');
             
@@ -291,7 +372,9 @@
                 requiredInputs.forEach(input => {
                     const warningElement = warningMap[input.id];
                     
-                    if (!input.value.trim()) {
+                    let isInputValid = (input.tagName === 'SELECT' && input.value.trim() === '') ? false : input.value.trim() !== '';
+
+                    if (!isInputValid) {
                         isFormValid = false;
                         if (warningElement) warningElement.style.display = 'block';
                     } else {
@@ -331,6 +414,13 @@
             ratingInputs.forEach(radio => {
                 radio.addEventListener('change', validateForm);
             });
+            
+            // Tambahkan event listener pada semua input wajib (kecuali rating yang sudah di atas)
+            requiredInputs.forEach(input => {
+                input.addEventListener('input', validateForm);
+                input.addEventListener('change', validateForm); // Untuk select
+            });
+
 
             // Jalankan validasi saat halaman dimuat (untuk old() values)
             validateForm();

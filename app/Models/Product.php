@@ -20,7 +20,12 @@ class Product extends Model
         'stock', 'min_stock',
         'sku', 'brand', 'condition', 'warranty',
         'weight', 'length', 'width',
-        // REVISI KRITIS 1: Menggunakan nama kolom DATABASE ASLI: 'primary_image'
+        
+        // REVISI KRITIS: Tambahkan kolom Pengiriman
+        'shipment_origin_city', 
+        'base_shipping_cost', 
+        
+        // Gambar & Rating
         'primary_image', 
         'additional_images',
         'rating_average', 
@@ -31,6 +36,10 @@ class Product extends Model
         'additional_images' => 'array',
         'price' => 'decimal:2',
         'discount_price' => 'decimal:2',
+        
+        // REVISI KRITIS: Cast Biaya Kirim Dasar
+        'base_shipping_cost' => 'decimal:2',
+        
         'weight' => 'decimal:2',
         'length' => 'decimal:2',
         'width' => 'decimal:2',
@@ -68,7 +77,7 @@ class Product extends Model
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                // REVISI KRITIS 2: Membaca kolom DATABASE ASLI: 'primary_image'
+                // Membaca kolom DATABASE ASLI: 'primary_image'
                 $imagePath = $attributes['primary_image'] ?? null; 
                 
                 if (empty($imagePath)) {
@@ -82,7 +91,6 @@ class Product extends Model
                 }
 
                 // Skenario 2: File Path Lokal (Upload)
-                // Jika storage:link berfungsi, ini HARUS bekerja.
                 return Storage::url($imagePath);
             },
         );

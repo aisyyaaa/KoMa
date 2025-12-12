@@ -47,8 +47,11 @@ class ProductSeeder extends Seeder
                 'category_id' => $catIdAlatTulis,
                 'seller_id' => $seller1->id, 
                 'description' => 'Buku catatan dengan kualitas premium untuk mahasiswa.',
-                'rating_average' => 4.5, 'is_active' => true,
-                'primary_image' => 'https://i.pinimg.com/1200x/d6/c8/04/d6c8041252accb64e1a489ec93dd675c.jpg', // FIX KRITIS
+                'is_active' => true,
+                'primary_image' => 'https://i.pinimg.com/1200x/d6/c8/04/d6c8041252accb64e1a489ec93dd675c.jpg',
+                // REVISI KRITIS: Kolom Pengiriman 
+                'shipment_origin_city' => 'Semarang',
+                'base_shipping_cost' => 10000,
             ],
             // Produk 2: Rice Cooker Mini (KOS - Seller 2)
             [
@@ -59,8 +62,11 @@ class ProductSeeder extends Seeder
                 'category_id' => $catIdKos,
                 'seller_id' => $seller2->id, 
                 'description' => 'Rice cooker mini serbaguna, cocok untuk porsi tunggal anak kos.',
-                'rating_average' => 3.0, 'is_active' => true,
-                'primary_image' => 'https://i.pinimg.com/1200x/41/ca/52/41ca525181a853463ab16ccf95b32b05.jpg', // FIX KRITIS
+                'is_active' => true,
+                'primary_image' => 'https://i.pinimg.com/1200x/41/ca/52/41ca525181a853463ab16ccf95b32b05.jpg',
+                // REVISI KRITIS: Kolom Pengiriman
+                'shipment_origin_city' => 'Yogyakarta',
+                'base_shipping_cost' => 8000,
             ],
             // Produk 3: Modul Praktikum (BUKU - Seller 1)
             [
@@ -71,8 +77,11 @@ class ProductSeeder extends Seeder
                 'category_id' => $catIdBuku,
                 'seller_id' => $seller1->id,
                 'description' => 'Modul wajib untuk praktikum algoritma.',
-                'rating_average' => 0.0, 'is_active' => true,
-                'primary_image' => 'https://i.pinimg.com/1200x/88/78/f4/8878f449f90c9a6beceaed572e45d0b8.jpg', // FIX KRITIS
+                'is_active' => true,
+                'primary_image' => 'https://i.pinimg.com/1200x/88/78/f4/8878f449f90c9a6beceaed572e45d0b8.jpg', 
+                // REVISI KRITIS: Kolom Pengiriman
+                'shipment_origin_city' => 'Semarang',
+                'base_shipping_cost' => 10000,
             ],
             
             // Produk 4: Sticky Notes Rainbow (ATK - Seller 3) - Stok Rendah
@@ -84,8 +93,11 @@ class ProductSeeder extends Seeder
                 'category_id' => $catIdAlatTulis,
                 'seller_id' => $seller3->id, 
                 'description' => 'Set sticky notes berwarna-warni.',
-                'rating_average' => 4.0, 'is_active' => true,
-                'primary_image' => 'https://i.pinimg.com/1200x/57/72/c8/5772c87a184425b66d2b165c19e3e743.jpg', // FIX KRITIS
+                'is_active' => true,
+                'primary_image' => 'https://i.pinimg.com/1200x/57/72/c8/5772c87a184425b66d2b165c19e3e743.jpg', 
+                // REVISI KRITIS: Kolom Pengiriman
+                'shipment_origin_city' => 'Jakarta Barat',
+                'base_shipping_cost' => 9000,
             ],
             
             // Produk 5: Gembok Stainless Mini (KOS - Seller 3)
@@ -97,8 +109,11 @@ class ProductSeeder extends Seeder
                 'category_id' => $catIdKos,
                 'seller_id' => $seller3->id, 
                 'description' => 'Gembok mini anti karat dari stainless steel.',
-                'rating_average' => 5.0, 'is_active' => true,
-                'primary_image' => 'https://i.pinimg.com/1200x/bb/83/b2/bb83b224b85f46827b90ab5ccd6e3632.jpg', // FIX KRITIS
+                'is_active' => true,
+                'primary_image' => 'https://i.pinimg.com/1200x/bb/83/b2/bb83b224b85f46827b90ab5ccd6e3632.jpg', 
+                // REVISI KRITIS: Kolom Pengiriman
+                'shipment_origin_city' => 'Jakarta Barat',
+                'base_shipping_cost' => 9000,
             ],
             
             // Produk 6: Mouse Wireless (ATK - Seller 2) - DENGAN GAMBAR BARU
@@ -110,8 +125,11 @@ class ProductSeeder extends Seeder
                 'category_id' => $catIdAlatTulis,
                 'seller_id' => $seller2->id, 
                 'description' => 'Mouse tanpa kabel yang nyaman digunakan untuk sesi belajar yang panjang.',
-                'rating_average' => 3.5, 'is_active' => true,
-                'primary_image' => 'https://i.pinimg.com/1200x/25/b5/30/25b530135b0c1327f8155f184420ad11.jpg', // FIX KRITIS
+                'is_active' => true,
+                'primary_image' => 'https://i.pinimg.com/1200x/25/b5/30/25b530135b0c1327f8155f184420ad11.jpg',
+                // REVISI KRITIS: Kolom Pengiriman
+                'shipment_origin_city' => 'Yogyakarta',
+                'base_shipping_cost' => 8000,
             ],
 
             // Produk 7: Kamus Teknik (BUKU - Seller 2) - DENGAN GAMBAR BARU
@@ -123,8 +141,11 @@ class ProductSeeder extends Seeder
                 'category_id' => $catIdBuku,
                 'seller_id' => $seller2->id, 
                 'description' => 'Kamus wajib untuk mahasiswa teknik.',
-                'rating_average' => 4.8, 'is_active' => true,
-                'primary_image' => 'https://i.pinimg.com/1200x/40/3f/f7/403ff7edc4e90747501487fed716f7b0.jpg', // FIX KRITIS
+                'is_active' => true,
+                'primary_image' => 'https://i.pinimg.com/1200x/40/3f/f7/403ff7edc4e90747501487fed716f7b0.jpg',
+                // REVISI KRITIS: Kolom Pengiriman
+                'shipment_origin_city' => 'Yogyakarta',
+                'base_shipping_cost' => 8000,
             ],
         ];
 
