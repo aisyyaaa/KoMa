@@ -12,31 +12,46 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder; 
 
 class PlatformReportController extends Controller
 {
-    // KONSTRUKTOR AUTH TELAH DIHAPUS
+    // KONSTRUKTOR AUTH TELAH DIHAPUS (Mengikuti struktur yang Anda berikan)
 
     /**
      * Laporan Penjual Aktif (SRS-MartPlace-09)
      */
-    public function activeSellers()
+    public function activeSellers(Request $request)
     {
+        $searchQuery = trim($request->get('search')); // FIX: Tambahkan trim()
+        
         $active = Seller::where('status', 'ACTIVE')->count();
         $inactive = Seller::whereNotIn('status', ['ACTIVE'])->count();
         $total = $active + $inactive;
 
-        $sellers = Seller::select('id', 'store_name', 'pic_name', 'email', 'phone_number', 'status', 'updated_at', 'registration_date')
-            ->withCount('products')
-            // FIX KRITIS: Menggunakan CASE untuk kompatibilitas SQLite/Urutan status (ACTIVE, REJECTED, PENDING)
-            ->orderByRaw("CASE 
-                            WHEN status = 'ACTIVE' THEN 1 
-                            WHEN status = 'REJECTED' THEN 2 
-                            WHEN status = 'PENDING' THEN 3 
-                            ELSE 4 
-                          END") 
+        $query = Seller::select('id', 'store_name', 'pic_name', 'email', 'phone_number', 'status', 'updated_at', 'registration_date')
+            ->withCount('products');
+            
+        // REVISI KRITIS 1: Tambahkan Filter Pencarian (Search Bar)
+        if ($searchQuery) {
+            $query->where(function (Builder $q) use ($searchQuery) {
+                // Cari di Nama Toko, Nama PIC, Email, atau Nomor Telepon
+                $q->where('store_name', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('pic_name', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('email', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('phone_number', 'like', '%' . $searchQuery . '%');
+            });
+        }
+            
+        // Pengurutan tetap sama
+        $sellers = $query->orderByRaw("CASE 
+                                        WHEN status = 'ACTIVE' THEN 1 
+                                        WHEN status = 'REJECTED' THEN 2 
+                                        WHEN status = 'PENDING' THEN 3 
+                                        ELSE 4 
+                                      END") 
             ->orderBy('store_name')
-            ->get()
+            ->get() 
             ->map(function ($s) {
                 if (strtoupper($s->status) === 'ACTIVE') {
                     $s->is_active_status = 'Aktif';
@@ -53,28 +68,44 @@ class PlatformReportController extends Controller
                 return $s;
             });
 
-        return view('platform.reports.active_sellers', compact('active', 'inactive', 'total', 'sellers'));
+        return view('platform.reports.active_sellers', compact('active', 'inactive', 'total', 'sellers', 'searchQuery'));
     }
 
     /**
      * Laporan Penjual Berdasarkan Provinsi (SRS-MartPlace-10)
-     * Mengambil daftar rinci SEMUA penjual dan mengelompokkannya berdasarkan provinsi.
      */
-    public function sellersByProvince()
+    public function sellersByProvince(Request $request)
     {
+        $searchQuery = trim($request->get('search')); // FIX: Tambahkan trim()
+
         // Query Sub-Select untuk menghitung total seller per provinsi
         $subQuery = Seller::select('province', DB::raw('count(*) as count_province'))
-                         ->groupBy('province');
+                             ->groupBy('province');
 
         // 1. Ambil data rinci SEMUA penjual (Aktif, Pending, Reject)
-        $allSellers = Seller::select('sellers.store_name', 'sellers.pic_name', 'sellers.province', 'sellers.status')
+        $query = Seller::select('sellers.id', 'sellers.store_name', 'sellers.pic_name', 'sellers.province', 'sellers.status', 'sellers.city', 'sellers.district')
+            ->withCount('products') 
             // Join dengan sub-query untuk mendapatkan jumlah seller per provinsi
             ->leftJoin(DB::raw('(' . $subQuery->toSql() . ') as sub'), 'sellers.province', '=', 'sub.province')
-            ->mergeBindings($subQuery->getQuery()) // Penting untuk binding SQLITE
+            ->mergeBindings($subQuery->getQuery());
+        
+        // REVISI KRITIS 2: Tambahkan Filter Pencarian (FIX Ambiguous Column)
+        if ($searchQuery) {
+            $query->where(function (Builder $q) use ($searchQuery) {
+                // Cari di Nama Toko, PIC
+                $q->where('store_name', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('pic_name', 'like', '%' . $searchQuery . '%')
+                  
+                  // Cari di Lokasi (HARUS menggunakan sellers.kolom untuk mengatasi error HY000)
+                  ->orWhere('sellers.province', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('sellers.city', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('sellers.district', 'like', '%' . $searchQuery . '%');
+            });
+        }
             
-            // REVISI KRITIS: Urutkan berdasarkan Jumlah Seller (DESC)
-            ->orderBy('sub.count_province', 'desc') 
-            ->orderBy('sellers.province') // Urutan kedua: Abjad Provinsi (A-Z)
+        // Eksekusi Query dan Pengurutan
+        $allSellers = $query->orderBy('sub.count_province', 'desc') 
+            ->orderBy('sellers.province') 
             ->orderBy('sellers.store_name')
             ->get();
             
@@ -87,22 +118,38 @@ class PlatformReportController extends Controller
             return (object)['total' => $group->count(), 'province' => $province];
         })->sortByDesc('total');
 
-        // Mengirim daftar datar ($allSellers) untuk tabel rincian di View HTML, 
-        // dan $byProvince untuk ringkasan. $groupedSellers dikirim untuk kompatibilitas.
-        return view('platform.reports.sellers_by_province', compact('allSellers', 'byProvince', 'groupedSellers'));
+        return view('platform.reports.sellers_by_province', compact('allSellers', 'byProvince', 'groupedSellers', 'searchQuery'));
     }
 
     /**
      * Laporan Produk Berdasarkan Rating (SRS-MartPlace-11)
      */
-    public function productsByRating()
+    public function productsByRating(Request $request)
     {
-        $products = Product::with(['seller', 'category']) 
+        $searchQuery = trim($request->get('search')); // FIX KRITIS 3: Tambahkan trim()
+        $searchLower = strtolower($searchQuery); // Ubah ke lowercase untuk pencarian yang konsisten
+
+        $query = Product::with(['seller', 'category']) 
             ->withAvg('reviews', 'rating') 
-            ->orderByDesc('reviews_avg_rating') 
-            ->paginate(15);
+            ->orderByDesc('reviews_avg_rating');
+            
+        // REVISI KRITIS 4: Tambahkan Filter Pencarian (Memaksa Lowercase Match)
+        if ($searchQuery) {
+            $query->where(function (Builder $q) use ($searchLower) {
+                // Cari di Nama Produk atau SKU (Menggunakan whereRaw untuk LOWERCASE comparison)
+                $q->whereRaw('LOWER(name) LIKE ?', ['%' . $searchLower . '%'])
+                  ->orWhereRaw('LOWER(sku) LIKE ?', ['%' . $searchLower . '%'])
+                  
+                  // Cari di Nama Toko (Seller) - Juga harus di lowercase
+                  ->orWhereHas('seller', function ($sq) use ($searchLower) {
+                      $sq->whereRaw('LOWER(store_name) LIKE ?', ['%' . $searchLower . '%']);
+                  });
+            });
+        }
+            
+        $products = $query->paginate(15)->withQueryString();
         
-        return view('platform.reports.products_by_rating', compact('products'));
+        return view('platform.reports.products_by_rating', compact('products', 'searchQuery'));
     }
 
     /**
@@ -110,6 +157,8 @@ class PlatformReportController extends Controller
      */
     public function exportPdf($type)
     {
+        // Logika Export PDF (Mengambil semua data, tanpa filter 'search' dari URL)
+        
         $data = [];
         $view = '';
         $filename = '';
@@ -120,7 +169,7 @@ class PlatformReportController extends Controller
 
         // Mendefinisikan Query Order By Count untuk digunakan di Export PDF
         $subQuery = Seller::select('province', DB::raw('count(*) as count_province'))
-                         ->groupBy('province');
+                             ->groupBy('province');
 
         try {
             if ($type === 'seller-accounts') {
@@ -129,13 +178,12 @@ class PlatformReportController extends Controller
 
                 $data['sellers'] = Seller::select('store_name', 'pic_name', 'email', 'phone_number', 'status', 'updated_at', 'registration_date')
                     ->withCount('products')
-                    // FIX KRITIS: Terapkan CASE expression di exportPdf untuk sorting
                     ->orderByRaw("CASE 
-                                    WHEN status = 'ACTIVE' THEN 1 
-                                    WHEN status = 'REJECTED' THEN 2 
-                                    WHEN status = 'PENDING' THEN 3 
-                                    ELSE 4 
-                                  END") 
+                                        WHEN status = 'ACTIVE' THEN 1 
+                                        WHEN status = 'REJECTED' THEN 2 
+                                        WHEN status = 'PENDING' THEN 3 
+                                        ELSE 4 
+                                      END") 
                     ->orderBy('store_name')
                     ->get()
                     ->map(function ($s) {
@@ -150,18 +198,14 @@ class PlatformReportController extends Controller
                 $filename = 'seller-accounts-' . $data['date'] . '.pdf'; 
 
             } elseif ($type === 'seller-locations') {
-                // Ambil data rinci SEMUA SELLER (Aktif, Pending, Reject)
                 $allSellers = Seller::select('sellers.store_name', 'sellers.pic_name', 'sellers.province', 'sellers.status')
                     ->leftJoin(DB::raw('(' . $subQuery->toSql() . ') as sub'), 'sellers.province', '=', 'sub.province')
-                    ->mergeBindings($subQuery->getQuery()) // Penting untuk binding SQLITE
-                    
-                    // REVISI KRITIS: Urutkan berdasarkan Jumlah Seller (DESC)
+                    ->mergeBindings($subQuery->getQuery()) 
                     ->orderBy('sub.count_province', 'desc') 
-                    ->orderBy('sellers.province') // Urutan kedua: Abjad Provinsi (A-Z)
+                    ->orderBy('sellers.province') 
                     ->orderBy('sellers.store_name')
                     ->get();
                 
-                // Mengirim data yang dikelompokkan untuk PDF (untuk grouping di PDF view)
                 $data['groupedSellers'] = $allSellers->groupBy('province'); 
                 
                 $view = 'platform.reports.pdf.seller_locations_pdf'; 
