@@ -63,6 +63,15 @@ Route::group([], function () {
 });
 
 
+// Registration result pages for sellers
+Route::get('/seller/registration/pending', function () {
+    return view('seller.auth.registration_pending');
+})->name('seller.register.pending');
+
+Route::get('/seller/registration/verified', function () {
+    return view('seller.auth.registration_verified');
+})->name('seller.register.verified');
+
 /*
 |--------------------------------------------------------------------------
 | Seller Area: AUTHENTICATION & VERIFICATION

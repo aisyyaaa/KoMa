@@ -29,12 +29,7 @@
     @endphp
 
     {{-- HEADER & NAVIGATION BAR --}}
-    <header class="shadow-md">
-        
-        {{-- BARIS ATAS KOSONGAN (Top Bar Warna Solid) --}}
-        <div class="bg-koma-accent w-full py-2">
-            <div class="container mx-auto px-4"></div>
-        </div>
+    <header class="shadow-md">        
 
         {{-- Baris Utama Logo & Search --}}
         <div class="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -92,7 +87,7 @@
                 <div class="relative z-10">
                     <span class="text-sm text-gray-700 font-bold tracking-widest uppercase">Spesial Mahasiswa</span>
                     <h2 class="text-4xl font-extrabold mt-2 leading-tight text-koma-primary">Diskon 20% Untuk Produk KoMa</h2>
-                    <p class="mt-3 text-lg text-gray-600">Kumpulkan **KoMa Coin** Anda Sekarang & Raih Keuntungan Belanja!</p>
+                    <p class="mt-3 text-lg text-gray-600">Kumpulkan <b>KoMa Coin</b> Anda Sekarang & Raih Keuntungan Belanja!</p>
 
                     {{-- Tombol Call to Action yang jelas --}}
                     <a href="#" class="mt-4 inline-block px-6 py-3 bg-koma-primary text-white font-semibold rounded-lg shadow-lg hover:bg-koma-danger transition duration-300">

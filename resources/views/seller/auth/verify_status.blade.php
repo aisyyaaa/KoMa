@@ -63,8 +63,22 @@
         </div>
 
         <div class="space-y-3">
+<<<<<<< Updated upstream:resources/views/seller/auth/verify_status.blade.php
             {{-- KOREKSI KRITIS: Mengubah landingpage.index menjadi katalog.index --}}
             <a href="{{ route('katalog.index') }}" 
+=======
+            <form action="{{ route('seller.auth.verify.resend') }}" method="POST">
+                @csrf
+                <button 
+                    type="submit"
+                    class="w-full py-3 px-4 border border-koma-primary text-koma-primary font-semibold rounded-lg 
+                           hover:bg-koma-bg-light transition duration-200">
+                    Kirim Ulang Email Verifikasi
+                </button>
+            </form>
+
+            <a href="{{ route('landingpage.index') }}" 
+>>>>>>> Stashed changes:resources/views/seller/auth/verify.blade.php
                class="block w-full py-3 px-4 bg-koma-primary text-white font-semibold rounded-lg 
                       text-center shadow-md hover:bg-koma-danger transition duration-200">
                 Kembali ke Halaman Beranda

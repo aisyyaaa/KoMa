@@ -50,7 +50,7 @@ class ProductRequest extends FormRequest
             // unique SKU on create
             $base['sku'][] = 'unique:products,sku';
             // Primary image wajib saat create
-            $base['primary_images'] = array_merge(['required'], (array)$base['primary_images']);
+            $base['primary_image'] = array_merge(['required'], (array)$base['primary_image']);
 
         } else {
             // Aturan SOMETIMES/REQUIRED untuk UPDATE
