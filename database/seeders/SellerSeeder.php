@@ -15,17 +15,12 @@ class SellerSeeder extends Seeder
      */
     public function run(): void
     {
-        // REVISI KRITIS: Bersihkan tabel terlebih dahulu untuk menghindari UNIQUE CONSTRAINT errors
         Seller::truncate(); 
 
-        // Pastikan folder storage/app/public/seller_docs ada
         if (!Storage::disk('public')->exists('seller_docs')) {
             Storage::disk('public')->makeDirectory('seller_docs');
         }
 
-        // --- Data Seller Uji Coba (6 Total Seller: 3 ACTIVE, 2 PENDING, 1 REJECTED) ---
-
-        // 1. Seller AKTIF - Jawa Tengah (ID 1)
         Seller::create([
             'store_name' => 'Toko Buku ABC',
             'short_description' => 'Menyediakan modul dan buku kuliah terlengkap di Jawa Tengah.',
@@ -44,7 +39,6 @@ class SellerSeeder extends Seeder
             'registration_date' => now(), 
         ]);
         
-        // 2. Seller AKTIF - DIY Yogyakarta (ID 2)
         Seller::create([
             'store_name' => 'KoMa Stationery',
             'short_description' => 'Menjual perlengkapan kos dan alat tulis modern.',
@@ -63,7 +57,6 @@ class SellerSeeder extends Seeder
             'registration_date' => now(), 
         ]);
 
-        // 3. Seller AKTIF - DKI Jakarta (ID 3)
         Seller::create([
             'store_name' => 'Grosir Kos Jakarta',
             'short_description' => 'Grosir kebutuhan dapur dan kebersihan kos.',
@@ -82,7 +75,6 @@ class SellerSeeder extends Seeder
             'registration_date' => now(), 
         ]);
 
-        // 4. Seller PENDING - Jawa Tengah (ID 4)
         Seller::create([
             'store_name' => 'Teknologi Cepat',
             'short_description' => 'Aksesoris Gadget dan Laptop Murah.',
@@ -101,7 +93,6 @@ class SellerSeeder extends Seeder
             'registration_date' => now(), 
         ]);
 
-        // 5. Seller PENDING - Jawa Barat (ID 5)
         Seller::create([
             'store_name' => 'Bumdes Hasil Tani',
             'short_description' => 'Menyediakan makanan dan minuman lokal.',
@@ -120,7 +111,6 @@ class SellerSeeder extends Seeder
             'registration_date' => now(), 
         ]);
 
-        // 6. Seller REJECTED - Jawa Barat (ID 6)
         Seller::create([
             'store_name' => 'Drop Shipper Abal',
             'short_description' => 'Menjual barang tanpa stok.',

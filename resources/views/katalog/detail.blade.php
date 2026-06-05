@@ -55,7 +55,6 @@
 
     {{-- HEADER (Minimalis) --}}
     <header class="shadow-md bg-white">
-        <div class="bg-koma-accent w-full py-2"></div>
         <div class="container mx-auto px-4 py-4 flex items-center justify-between">
             <a href="{{ route('katalog.index') }}" class="text-2xl font-bold text-koma-primary hover:text-koma-danger transition duration-150">
                 ← Kembali ke Katalog

@@ -15,6 +15,7 @@ class Seller extends Authenticatable
      * Diselaraskan dengan kolom di migrasi terbaru.
      */
     protected $fillable = [
+<<<<<<< Updated upstream
         // Store / Account
         'store_name',
         'short_description',
@@ -43,6 +44,12 @@ class Seller extends Authenticatable
         'is_active',
         'status', // <--- KOREKSI KRITIS: Menggunakan 'status' sesuai migrasi dan controller
         'registration_date',
+=======
+        'store_name', 'store_description',
+        'pic_name', 'pic_email', 'pic_phone', 'pic_ktp_number',
+        'pic_street', 'pic_rt', 'pic_rw', 'pic_village', 'pic_district', 'pic_city', 'pic_province',
+        'status', 'password', 'pic_photo_path', 'pic_ktp_file_path'
+>>>>>>> Stashed changes
     ];
 
     /**
