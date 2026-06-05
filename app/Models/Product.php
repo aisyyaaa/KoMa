@@ -4,66 +4,138 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Casts\Attribute; 
 
 class Product extends Model
 {
     use HasFactory;
 
-    // kolom yang boleh diisi mass-assignment
     protected $fillable = [
-        'category_id', 'name', 'price', 'stock', 'is_active', 'description', 'photo',
+        'seller_id', 'category_id',
+        'name', 
+        'slug',
+        'description',
+        'price', 'discount_price',
+        'stock', 'min_stock',
+        'sku', 'brand', 'condition', 'warranty',
+        'weight', 'length', 'width',
+        
+        // REVISI KRITIS: Tambahkan kolom Pengiriman
+        'shipment_origin_city', 
+        'base_shipping_cost', 
+        
+        // Gambar & Rating
+        'primary_image', 
+        'additional_images',
+        'rating_average', 
+        'is_active'
     ];
 
-    // casting tipe data
     protected $casts = [
-        'is_active' => 'boolean',
-        'price'     => 'decimal:2',
+        'additional_images' => 'array',
+        'price' => 'decimal:2',
+        'discount_price' => 'decimal:2',
+        
+        // REVISI KRITIS: Cast Biaya Kirim Dasar
+        'base_shipping_cost' => 'decimal:2',
+        
+        'weight' => 'decimal:2',
+        'length' => 'decimal:2',
+        'width' => 'decimal:2',
+        'warranty' => 'integer',
+        'stock' => 'integer',
+        'min_stock' => 'integer',
     ];
+    
+    // FIX KRITIS: Tambahkan accessor URL gambar tambahan ke Appends
+    protected $appends = ['primary_image_url', 'additional_image_urls', 'condition_label']; 
+
+    // --- RELATIONS ---
+
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class);
+    }
 
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    // Pencarian by name/description
-    public function scopeSearch($query, ?string $q)
+    public function reviews()
     {
-        $q = trim((string) $q);
-        if ($q === '') return $query;
-
-        return $query->where(function ($qq) use ($q) {
-            $qq->where('name', 'like', "%{$q}%")
-               ->orWhere('description', 'like', "%{$q}%");
-        });
+        return $this->hasMany(Review::class);
     }
 
-    // Hanya produk aktif
-    public function scopeActive($query, bool $onlyActive = true)
+    // --- ACCESSORS / VIRTUAL ATTRIBUTES ---
+    
+    /**
+     * ACCESSOR untuk mendapatkan URL gambar utama.
+     */
+    protected function getPrimaryImageUrlAttribute(): string
     {
-        return $onlyActive ? $query->where('is_active', true) : $query;
+        $imagePath = $this->attributes['primary_image'] ?? null; 
+        
+        if (empty($imagePath)) {
+            // Fallback ke aset default jika path kosong
+            return asset('images/default_product.png'); 
+        }
+
+        // Skenario 1: Path sudah berupa URL lengkap (Seeder)
+        if (filter_var($imagePath, FILTER_VALIDATE_URL)) {
+            return $imagePath;
+        }
+
+        // Skenario 2: File Path Lokal (Upload)
+        // FIX KRITIS: Gunakan Storage::url() tanpa pemeriksaan Storage::exists() 
+        // untuk memastikan produk Upload berhasil ditampilkan (asumsi storage:link benar).
+        try {
+            return Storage::url($imagePath);
+        } catch (\Exception $e) {
+            // Fallback jika terjadi error saat memproses path lokal (misalnya path terlalu panjang/rusak)
+            return asset('images/default_product.png');
+        }
     }
 
-    // Filter kategori
-    public function scopeInCategory($query, $categoryId)
+    /**
+     * Accessor untuk mendapatkan array URL gambar tambahan.
+     */
+    public function getAdditionalImageUrlsAttribute(): array
     {
-        return $categoryId ? $query->where('category_id', $categoryId) : $query;
+        $images = $this->additional_images ?? [];
+        
+        // Pastikan images adalah array, meskipun sudah di-cast, ini untuk keamanan
+        if (!is_array($images)) {
+            $images = json_decode($images, true) ?: []; 
+        }
+
+        $urls = [];
+        foreach ($images as $img) {
+            if (empty($img)) continue;
+            
+            if (filter_var($img, FILTER_VALIDATE_URL)) {
+                $urls[] = $img; // URL Eksternal (Seeder)
+                continue;
+            }
+            
+            // Path Lokal (Upload)
+            $urls[] = Storage::url($img);
+        }
+
+        return $urls;
     }
 
-    // Filter harga
-    public function scopePriceBetween($query, $min = null, $max = null)
-    {
-        if ($min !== null && $min !== '') $query->where('price', '>=', $min);
-        if ($max !== null && $max !== '') $query->where('price', '<=', $max);
-        return $query;
-    }
 
-    // Urutan standar
-    public function scopeSortBy($query, string $sort = 'newest')
+    /**
+     * Accessor untuk mendapatkan label kondisi yang lebih mudah dibaca.
+     */
+    public function getConditionLabelAttribute()
     {
-        return match ($sort) {
-            'price_asc'  => $query->orderBy('price', 'asc'),
-            'price_desc' => $query->orderBy('price', 'desc'),
-            default      => $query->latest('id'),
+        return match($this->condition) {
+            'new' => 'Baru',
+            'used' => 'Bekas',
+            default => ucfirst($this->condition ?? ''),
         };
     }
 }

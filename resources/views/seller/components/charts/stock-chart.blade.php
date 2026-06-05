@@ -1,0 +1,1 @@
+{{-- empty stock chart partial --}}

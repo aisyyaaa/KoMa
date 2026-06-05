@@ -1,0 +1,1 @@
+{{-- empty rating chart partial --}}

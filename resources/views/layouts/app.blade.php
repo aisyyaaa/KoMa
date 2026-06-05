@@ -1,65 +1,62 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>Katalog Produk Market Place</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <script>
-            window.addEventListener('DOMContentLoaded', function() {
-                setTimeout(function() {
-                    if (!window.Alpine) {
-                        alert('Alpine.js TIDAK AKTIF!');
-                    }
-                }, 500);
-            });
-        </script>
-    </head>
-    <body class="font-sans antialiased">
-        <div id="app"
-            x-data="{ dark: localStorage.getItem('theme') === 'dark' }"
-            x-init="
-                $watch('dark', value => {
-                    localStorage.setItem('theme', value ? 'dark' : 'light');
-                    if(value){
-                        document.documentElement.classList.add('dark');
-                    } else {
-                        document.documentElement.classList.remove('dark');
-                    }
-                });
-                if(dark){
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            "
-        >
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
+    <!-- VITE (BAGIAN PALING PENTING) -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
+<body class="font-sans antialiased bg-gray-50">
+    <div class="min-h-screen">
+
+        {{-- HEADER --}}
+        <header class="bg-white border-b shadow-md">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+                <div class="flex justify-between items-center h-16">
+                    
+                    <div class="shrink-0 flex items-center">
+                        <a href="{{ url('/') }}" class="text-2xl font-extrabold text-indigo-700">
+                            🛒 KoMa
+                        </a>
                     </div>
-                </header>
-            @endisset
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
-        </div>
-        </div>
+                    <div class="flex-grow max-w-2xl mx-8">
+                        <input type="text" placeholder="Cari produk, kategori, atau toko..." 
+                               class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm p-2.5">
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <a href="{{ url('/login') }}" class="text-gray-600 hover:text-indigo-700 font-medium">Login</a>
+                        <a href="{{ route('seller.register') }}" 
+                           class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium transition duration-150">
+                           Daftar Penjual
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {{-- MAIN CONTENT --}}
+        <main class="py-12">
+            @yield('content')
+        </main>
+
+        {{-- FOOTER --}}
+        <footer class="bg-gray-900 text-white mt-auto py-6">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
+                Marketplace 2025. Hak Cipta dan Kebijakan
+            </div>
+        </footer>
+
     </div>
-    </body>
+</body>
 </html>
