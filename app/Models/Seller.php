@@ -15,41 +15,11 @@ class Seller extends Authenticatable
      * Diselaraskan dengan kolom di migrasi terbaru.
      */
     protected $fillable = [
-<<<<<<< Updated upstream
-        // Store / Account
-        'store_name',
-        'short_description',
-        'email',
-        'password',
-
-        // PIC (person in charge) and contact
-        'pic_name',
-        'phone_number',
-        'ktp_number', // Kolom ini ada di migrasi
-
-        // Address details
-        'address',
-        'rt',
-        'rw',
-        'village',
-        'district',
-        'city',
-        'province',
-
-        // Document paths
-        'pic_photo_path',
-        'ktp_file_path',
-
-        // Status / verification
-        'is_active',
-        'status', // <--- KOREKSI KRITIS: Menggunakan 'status' sesuai migrasi dan controller
-        'registration_date',
-=======
-        'store_name', 'store_description',
-        'pic_name', 'pic_email', 'pic_phone', 'pic_ktp_number',
-        'pic_street', 'pic_rt', 'pic_rw', 'pic_village', 'pic_district', 'pic_city', 'pic_province',
-        'status', 'password', 'pic_photo_path', 'pic_ktp_file_path'
->>>>>>> Stashed changes
+        'store_name', 'short_description', 'email', 'password',
+        'pic_name', 'phone_number', 'ktp_number',
+        'address', 'rt', 'rw', 'village', 'district', 'city', 'province',
+        'pic_photo_path', 'ktp_file_path',
+        'is_active', 'status', 'registration_date',
     ];
 
     /**

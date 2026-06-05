@@ -25,6 +25,10 @@ use App\Http\Controllers\Platform\SellerVerificationController as PlatformSeller
 use App\Http\Controllers\Platform\PlatformSellerController; 
 use App\Http\Controllers\Platform\PlatformCategoryController; 
 
+// --- BUYER CONTROLLERS ---
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
+
 // --- LARAVEL FACADES ---
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -44,6 +48,17 @@ Route::get('/katalog/autocomplete', [CatalogController::class, 'autocomplete'])-
 Route::get('/katalog/{product:slug}', [CatalogController::class, 'show'])->name('katalog.show'); 
 // Pemberian Komentar dan Rating (SRS-MartPlace-06)
 Route::post('/katalog/{product}/review', [ReviewController::class, 'store'])->name('katalog.review.store');
+
+// --- 1b. Buyer Routes (Cart & Order) ---
+Route::middleware(['auth'])->group(function () {
+    Route::get('cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
+    Route::delete('cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::patch('cart/increment/{cart}', [CartController::class, 'increment'])->name('cart.increment');
+    Route::patch('cart/decrement/{cart}', [CartController::class, 'decrement'])->name('cart.decrement');
+    Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
+});
 
 // --- 2. Global Authentication (Login/Logout, Pendaftaran KHUSUS Penjual) ---
 Route::group([], function () {
@@ -105,6 +120,15 @@ Route::middleware(['auth:seller'])->prefix('seller')->name('seller.')->group(fun
     Route::resource('products', SellerProductController::class);
 
     
+
+    // Pesanan (SRS-KOMA-07)
+    Route::get('orders', [SellerOrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/create', [SellerOrderController::class, 'create'])->name('orders.create');
+    Route::post('orders', [SellerOrderController::class, 'store'])->name('orders.store');
+    Route::get('orders/{order}', [SellerOrderController::class, 'show'])->name('orders.show');
+    Route::get('orders/{order}/edit', [SellerOrderController::class, 'edit'])->name('orders.edit');
+    Route::patch('orders/{order}', [SellerOrderController::class, 'update'])->name('orders.update');
+    Route::patch('orders/{order}/status', [SellerOrderController::class, 'updateStatus'])->name('orders.update_status');
 
     // Review/Rating (Melihat Review Produknya)
     Route::get('reviews', [SellerReviewController::class, 'index'])->name('reviews.index');

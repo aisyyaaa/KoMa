@@ -47,7 +47,7 @@ class OrderController extends Controller
     public function update(Request $request, Order $order)
     {
         $request->validate([
-            'status' => 'required|in:Dikemas,Dikirim,Selesai',
+            'status' => 'required|in:Menunggu,Diproses,Dikirim,Selesai',
         ]);
 
         $order->update(['status' => $request->status]);

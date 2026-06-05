@@ -122,18 +122,22 @@ class SellerReportController extends Controller
                 break;
         }
 
+        if ($products->isEmpty()) {
+            return back()->with('warning', 'Tidak ada data untuk diekspor. Laporan kosong tidak dapat diunduh.');
+        }
+
         // Siapkan data untuk View PDF
         $data = [
             'products' => $products,
             'title' => $title,
             'reportType' => $type,
             'seller' => Auth::guard('seller')->user(),
-            'date' => now()->format('d-m-Y'), 
+            'date' => now()->format('d-m-Y'),
         ];
-        
+
         // Panggil View PDF sesuai $view_path yang sudah ditentukan
         $pdf = Pdf::loadView($view_path, $data);
-        
+
         $fileName = 'laporan_stok_' . $type . '_' . time() . '.pdf';
         return $pdf->download($fileName);
     }

@@ -45,7 +45,7 @@ class OrderController extends Controller
             'phone'   => $request->phone,
             'address' => $request->address,
             'payment_method' => 'COD',
-            'status'  => 'Dikemas',
+            'status'  => 'Menunggu',
             'total'   => $total,   
         ]);
 
@@ -66,6 +66,6 @@ class OrderController extends Controller
         // Kosongkan cart user
         Cart::where('user_id', Auth::id())->delete();
 
-        return redirect()->route('orders.index')->with('success', 'Pesanan berhasil dibuat. Status: Dikemas.');
+        return redirect()->route('orders.index')->with('success', 'Pesanan berhasil dibuat. Menunggu konfirmasi penjual.');
     }
 }

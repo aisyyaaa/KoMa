@@ -18,6 +18,12 @@
         </a>
     </div>
 
+    @if(session('warning'))
+    <div class="mb-4 p-3 bg-yellow-100 text-yellow-800 rounded-lg text-sm">
+        {{ session('warning') }}
+    </div>
+    @endif
+
     {{-- REPORT TABLE --}}
     <div class="bg-white rounded-lg shadow overflow-x-auto">
         <table class="w-full min-w-full">

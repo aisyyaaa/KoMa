@@ -87,7 +87,7 @@
                 <div class="relative z-10">
                     <span class="text-sm text-gray-700 font-bold tracking-widest uppercase">Spesial Mahasiswa</span>
                     <h2 class="text-4xl font-extrabold mt-2 leading-tight text-koma-primary">Diskon 20% Untuk Produk KoMa</h2>
-                    <p class="mt-3 text-lg text-gray-600">Kumpulkan <b>KoMa Coin</b> Anda Sekarang & Raih Keuntungan Belanja!</p>
+                    <p class="mt-3 text-lg text-gray-600">Kumpulkan <strong>KoMa Coin</strong> Anda Sekarang & Raih Keuntungan Belanja!</p>
 
                     {{-- Tombol Call to Action yang jelas --}}
                     <a href="#" class="mt-4 inline-block px-6 py-3 bg-koma-primary text-white font-semibold rounded-lg shadow-lg hover:bg-koma-danger transition duration-300">
@@ -252,7 +252,7 @@
                 </h2>
                 
                 {{-- Grid produk dengan penyesuaian untuk menghindari himpitan --}}
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4"> 
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
                     @forelse ($products as $product)
                         <div class="bg-white border border-koma-bg-light rounded-lg overflow-hidden shadow-md hover:shadow-xl transition duration-300">
                             

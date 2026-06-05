@@ -56,6 +56,17 @@
                     Produk
                 </a>
 
+                {{-- Pesanan --}}
+                <a href="{{ route('seller.orders.index') }}"
+                   class="flex items-center px-4 py-2.5 rounded-lg text-sm font-medium
+                                {{ request()->routeIs('seller.orders.*') ? 'bg-koma-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}
+                                transition duration-150">
+                    <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 7H4l1-7z"></path>
+                    </svg>
+                    Pesanan
+                </a>
+
                 {{-- Laporan --}}
                 <div x-data="{ open: {{ request()->routeIs('seller.reports.*') ? 'true' : 'false' }} }">
                     <button @click="open = !open" 
